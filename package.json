@@ -12,7 +12,8 @@
     "start": "astro build && astro preview",
     "build": "astro build",
     "preview": "astro preview",
-    "test": "vitest run"
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest --passWithNoTests"
   },
   "dependencies": {
     "@astrojs/solid-js": "^1.2.0",
