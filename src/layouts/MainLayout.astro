@@ -1,0 +1,27 @@
+---
+import '@fontsource/overpass';
+import '@fontsource/roboto';
+import { MainFooter } from '~components/shared/organisms/MainFooter';
+import { NavHeader } from '~components/shared/organisms/NavHeader';
+import MainHead from './MainHead.astro';
+
+export type Props = {
+  title?: string;
+  lang?: string;
+};
+
+const { title = 'test', lang = 'en' } = Astro.props as Props;
+---
+
+<html {...{lang}}>
+  <MainHead {...{title}} />
+  <body
+    class='min-h-screen flex justify-between flex-col w-full font-roboto bg-blue_bg text-slate-400 text-sm'
+  >
+    <NavHeader />
+    <div class='flex-1 mt-6 px-3'>
+      <slot />
+    </div>
+    <MainFooter />
+  </body>
+</html>
