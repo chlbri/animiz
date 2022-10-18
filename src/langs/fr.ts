@@ -1,20 +1,8 @@
 export const fr = {
   navBar: {
-    home: {
-      label: 'Home',
-      link: '#',
-    },
-    profile: {
-      label: 'Profile',
-      link: '#',
-    },
-    mangas: {
-      label: 'Mangas',
-      link: '#',
-    },
-    animes: {
-      label: 'Animes',
-      link: '#',
-    },
+    home: 'Accueil',
+    profile: 'Profil',
+    mangas: 'Mangas',
+    animes: 'Animés',
   },
 } as const;

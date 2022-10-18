@@ -8,8 +8,10 @@ specifiers:
   '@bemedev/decompose': ^0.1.6
   '@fontsource/overpass': ^4.5.10
   '@fontsource/roboto': ^4.5.8
+  '@xstate/immer': ^0.3.1
   astro: ^1.5.0
   dequal: ^2.0.3
+  immer: ^9.0.15
   solid-js: ^1.4.3
   tailwindcss: ^3.0.24
   vite: ^3.1.8
@@ -24,8 +26,10 @@ dependencies:
   '@bemedev/decompose': 0.1.6
   '@fontsource/overpass': 4.5.10
   '@fontsource/roboto': 4.5.8
+  '@xstate/immer': 0.3.1_immer@9.0.15+xstate@4.33.6
   astro: 1.5.0
   dequal: 2.0.3
+  immer: 9.0.15
   solid-js: 1.5.8
   tailwindcss: 3.1.8
   xstate: 4.33.6
@@ -665,6 +669,16 @@ packages:
       vscode-languageserver-types: 3.17.2
       vscode-nls: 5.2.0
       vscode-uri: 2.1.2
+    dev: false
+
+  /@xstate/immer/0.3.1_immer@9.0.15+xstate@4.33.6:
+    resolution: {integrity: sha512-YE+KY08IjEEmXo6XKKpeSGW4j9LfcXw+5JVixLLUO3fWQ3M95joWJ40VtGzx0w0zQSzoCNk8NgfvwWBGSbIaTA==}
+    peerDependencies:
+      immer: ^9.0.6
+      xstate: ^4.29.0
+    dependencies:
+      immer: 9.0.15
+      xstate: 4.33.6
     dev: false
 
   /acorn-jsx/5.3.2_acorn@8.8.0:
@@ -2016,6 +2030,10 @@ packages:
 
   /ieee754/1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
+    dev: false
+
+  /immer/9.0.15:
+    resolution: {integrity: sha512-2eB/sswms9AEUSkOm4SbV5Y7Vmt/bKRwByd52jfLkW4OLYeaTP3EEiJ9agqU0O/tq6Dk62Zfj+TJSqfm1rLVGQ==}
     dev: false
 
   /import-meta-resolve/2.1.0:

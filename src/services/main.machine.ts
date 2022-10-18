@@ -1,5 +1,5 @@
 import { createMachine } from 'xstate';
-import type { Events } from './main.types';
+import type { Context, Events } from './main.types';
 
 export const machine = createMachine({
   predictableActionArguments: true,
@@ -7,8 +7,10 @@ export const machine = createMachine({
   tsTypes: {} as import('./main.machine.typegen').Typegen0,
   schema: {
     events: {} as Events,
+    context: {} as Context,
   },
 
+  initial: 'idle',
   states: {
     idle: {
       always: 'working',
