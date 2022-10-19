@@ -82,9 +82,8 @@ export const positionTooltipMachine = createMachine(
       },
       final: {
         type: 'final',
-        data: ({ positionX: x, positionY: y }) => {
-          if (!x || !y) return;
-          return `translate(${x}px, ${y}px)`;
+        data: ({ positionX, positionY }) => {
+          return `translate(${positionX ?? 0}px, ${positionY ?? 0}px)`;
         },
       },
     },

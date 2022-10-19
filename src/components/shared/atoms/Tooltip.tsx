@@ -3,7 +3,7 @@
 import { Accessor, Component, createEffect, Show } from 'solid-js';
 import type { Size } from 'src/services/tooltip.types';
 
-type Props = {
+export type TootltipProps = {
   title?: string;
   summary: string;
   getSize: (size: Size) => void;
@@ -11,7 +11,7 @@ type Props = {
   show: Accessor<boolean>;
 };
 
-export const Tooltip: Component<Props> = ({
+export const Tooltip: Component<TootltipProps> = ({
   title,
   summary,
   position,
@@ -30,20 +30,19 @@ export const Tooltip: Component<Props> = ({
   return (
     <div
       ref={ref!}
-      class='absolute h-14 w-32 flex flex-col space-y-2 opacity-0 pointer-events-none transition transform duration-500 ease-in-out text-white z-30 border rounded-xl border-white'
+      class='absolute flex flex-col w-max space-y-2 opacity-0 pointer-events-none transition transform duration-500 ease-in-out text-white z-30 border rounded-xl border-gray-500'
       classList={{
         'pointer-events-auto opacity-100': show(),
       }}
       style={{
         transform: position(),
-        transition: 'opacity 3.5',
       }}
     >
-      <Show when={!!title} fallback={<span class='h-8' />}>
-        <h4 class='font-medium'>{title}</h4>
+      <Show when={!!title} fallback={<span class='h-5' />}>
+        <h4 class='font-medium p-1'>{title}</h4>
       </Show>
-      <span class='w-full bg-gray-400 h-1' />
-      <span class='text-xs'>{summary}</span>
+      <span class='w-full bg-gray-400 h-0.5' />
+      <span class='text-xs py-1 px-3 text-gray-300'>{summary}</span>
     </div>
   );
 };
