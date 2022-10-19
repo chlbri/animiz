@@ -13,7 +13,7 @@ import {
   TypegenEnabled,
   Typestate,
 } from 'xstate';
-import { matches } from '~utils/machine';
+import { matches as matchesD, MatchOptions } from '~utils/machine';
 
 export function createInterpret<
   TContext,
@@ -69,10 +69,24 @@ export function createInterpret<
       : string)[]
   ) => values.every((value) => store().hasTag(value));
 
+  const value = createRoot(() =>
+    createMemo(() => store().value, undefined, {
+      equals(prev, next) {
+        return prev === next;
+      },
+    })
+  );
+
+  const matches = (...values: MatchOptions[]) => {
+    return createRoot(() =>
+      createMemo(() => matchesD(value())(...values))
+    );
+  };
+
   const output = {
     send: service.send,
     subscribe: service.subscribe.bind(service),
-    matches: matches(store().value),
+    matches,
     context,
     hasTags,
   } as const;

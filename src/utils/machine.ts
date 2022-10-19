@@ -1,4 +1,5 @@
 import { decompose, StateValue } from '@bemedev/decompose';
+import type { Accessor } from 'solid-js';
 
 export type MatchOptions =
   | {
@@ -38,4 +39,3 @@ export function matches(value: StateValue) {
     return matchers.every((matcher) => matcher === true);
   };
 }
-

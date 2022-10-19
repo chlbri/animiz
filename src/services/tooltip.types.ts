@@ -1,32 +1,37 @@
-type Position = {
+export type Position = {
   x: number;
   y: number;
 };
 
-type Size = {
+export type Size = {
   width: number;
   height: number;
 };
 
-type Coords = {
+export type Coords = {
   left: number;
   top: number;
-  right: number;
-  bottom: number;
+  width: number;
+  height: number;
 };
 
 export type Context = {
   mousePosition?: Position;
   position?: Position;
   coords?: Coords;
-  window?: Size;
-  moving?: boolean;
+  viewPort?: Size;
+  toolTipSize?: Size;
   timeToShow?: number;
   timeToHide?: number;
 };
 
 export type Events =
-  | { type: 'HIDE' }
-  | { type: 'SET_WINDOW_DIMENSIONS'; size: Size }
-  | { type: 'SET_COORDS'; coords: Coords }
-  | { type: 'MOUSE_MOVE'; position: Position }
+  | { type: 'MOUSE_ENTER' | 'MOUSE_LEAVE' }
+  | { type: 'GET_TOOLTIP'; size: Size }
+  | { type: 'GET_VIEWPORT'; size: Size }
+  | { type: 'GET_COORDS'; coords: Coords }
+  | { type: 'MOUSE_MOVE'; position: Position };
+
+export type Services = {
+  positionTooltip: { data: Position | undefined };
+};

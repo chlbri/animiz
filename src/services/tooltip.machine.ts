@@ -1,55 +1,100 @@
 import { assign, createMachine } from 'xstate';
-import type { Context, Events } from './tooltip.types';
+import { servicePosition } from './positionTooltip.machine';
+import type { Context, Events, Position, Services } from './tooltip.types';
 
 const DEFAULT_TIME_TO_SHOW = 300;
-const DEFAULT_TIME_TO_HIDE = 500;
+const DEFAULT_TIME_TO_HIDE = 5000;
+
+export const DEFAULT_POSITION: Position = { x: 0, y: 0 };
 
 export const tooltipMachine = createMachine(
   {
-    predictableActionArguments: true,
-    preserveActionOrder: true,
     tsTypes: {} as import('./tooltip.machine.typegen').Typegen0,
     schema: {
       context: {} as Context,
       events: {} as Events,
+      services: {} as Services,
     },
+    preserveActionOrder: true,
+    predictableActionArguments: true,
 
+    context: {},
+
+    id: 'tooltip',
+    initial: 'leave',
     on: {
-      SET_WINDOW_DIMENSIONS: {
-        actions: ['setWindowDimensions'],
+      GET_VIEWPORT: {
+        actions: 'setWindowDimensions',
       },
-
-      SET_COORDS: {
-        actions: ['setCoords'],
+      GET_COORDS: {
+        actions: 'setCoords',
+      },
+      GET_TOOLTIP: {
+        actions: 'getTooltipSize',
       },
     },
-
-    initial: 'hide',
     states: {
-      show: {
+      enter: {
+        initial: 'hide',
         on: {
-          HIDE: 'hide',
-          MOUSE_MOVE: {
-            actions: ['setMousePosition'],
-            target: 'show',
-            internal: false,
-          },
+          MOUSE_LEAVE: 'leave',
         },
-        after: {
-          TIME_TO_HIDE: {
-            target: 'hide',
+        states: {
+          show: {
+            initial: 'checking',
+            after: {
+              TIME_TO_HIDE: 'hide',
+            },
+            on: {
+              MOUSE_MOVE: {
+                target: 'show',
+                actions: 'setMousePosition',
+                internal: false,
+              },
+            },
+            states: {
+              checking: {
+                always: {
+                  target: 'position',
+                  cond: 'allValuesAreDefined',
+                },
+              },
+              position: {
+                invoke: {
+                  src: 'positionTooltip',
+                  onDone: {
+                    actions: 'getPosition',
+                  },
+                },
+              },
+            },
+          },
+          hide: {
+            entry: ['hide'],
+            on: {
+              MOUSE_MOVE: {
+                target: 'waiting',
+                actions: 'setMousePosition',
+              },
+            },
+          },
+          waiting: {
+            after: {
+              TIME_TO_SHOW: {
+                target: 'show',
+                actions: [],
+                internal: false,
+              },
+            },
           },
         },
       },
-      middle: {
-        after: {
-          TIME_TO_SHOW: 'show',
-        },
-      },
-      hide: {
-        entry: ['stopMoving'],
+      leave: {
+        entry: 'hide',
         on: {
-          MOUSE_MOVE: { target: 'middle', actions: ['setMousePosition'] },
+          MOUSE_ENTER: {
+            target: 'enter',
+          },
         },
       },
     },
@@ -61,26 +106,51 @@ export const tooltipMachine = createMachine(
       }),
 
       setWindowDimensions: assign({
-        window: (_, { size }) => size,
+        viewPort: (_, { size }) => size,
       }),
 
       setCoords: assign({
         coords: (_, { coords }) => coords,
       }),
 
-      //TODO: Calculate position
-      stopMoving: assign({
+      hide: assign({
         position: (_) => undefined,
+      }),
+
+      getPosition: assign({
+        position: (_, { data }) => data,
+      }),
+
+      getTooltipSize: assign({
+        toolTipSize: (_, { size }) => size,
       }),
     },
 
     guards: {
-      // isNotMoving: ({ moving }) => !moving,
+      allValuesAreDefined: ({ coords, mousePosition, viewPort }) => {
+        const out = !!coords && !!mousePosition && !!viewPort;
+        return out;
+      },
     },
 
     delays: {
       TIME_TO_HIDE: ({ timeToHide }) => timeToHide ?? DEFAULT_TIME_TO_HIDE,
       TIME_TO_SHOW: ({ timeToShow }) => timeToShow ?? DEFAULT_TIME_TO_SHOW,
+    },
+
+    services: {
+      positionTooltip: ({
+        mousePosition,
+        toolTipSize,
+        coords,
+        viewPort,
+      }) =>
+        servicePosition({
+          coords: coords!,
+          mousePosition: mousePosition!,
+          toolTipSize: toolTipSize!,
+          viewPort: viewPort!,
+        }),
     },
   }
 );
