@@ -1,16 +1,21 @@
 import type { NOmit } from '@bemedev/core';
 import { assign } from '@xstate/immer';
-import { createMachine, interpret } from 'xstate';
+import { assign as assignM, createMachine, interpret } from 'xstate';
 import { waitFor } from 'xstate/lib/waitFor';
 import type { Coords, Position, Size } from './tooltip.types';
 
 type Context = {
-  mousePosition: Position;
+  mousePosition?: Position;
   positionX?: number;
   positionY?: number;
-  toolTipSize: Size;
-  coords: Coords;
-  viewPort: Size;
+  toolTipSize?: Size;
+  coords?: Coords;
+  viewPort?: Size;
+};
+
+type Events = {
+  type: 'GET_PROPS';
+  props: NOmit<Context, 'positionX' | 'positionY'>;
 };
 
 const RATIO_X = 3 / 4;
@@ -25,14 +30,30 @@ export const positionTooltipMachine = createMachine(
   {
     schema: {
       context: {} as Context,
+      events: {} as Events,
     },
     predictableActionArguments: true,
     preserveActionOrder: true,
     tsTypes: {} as import('./positionTooltip.machine.typegen').Typegen0,
+    context: {},
 
-    id: 'positionTooltip',
-    initial: 'positionX',
+    // id: 'positionTooltip',
+    initial: 'idle',
     states: {
+      idle: {
+        on: {
+          GET_PROPS: {
+            actions: ['assignProps'],
+            target: 'checking',
+          },
+        },
+      },
+      checking: {
+        always: {
+          cond: 'allPropsAreDefined',
+          target: 'positionX',
+        },
+      },
       positionX: {
         always: [
           {
@@ -62,8 +83,8 @@ export const positionTooltipMachine = createMachine(
       final: {
         type: 'final',
         data: ({ positionX: x, positionY: y }) => {
-          const out = { x, y };
-          return out;
+          if (!x || !y) return;
+          return `translate(${x}px, ${y}px)`;
         },
       },
     },
@@ -71,39 +92,53 @@ export const positionTooltipMachine = createMachine(
   {
     guards: {
       isLeft: ({ mousePosition, viewPort }) => {
-        const width = viewPort.width * RATIO_X;
-        const positionX = mousePosition.x;
+        const width = viewPort!.width * RATIO_X;
+        const positionX = mousePosition!.x;
         return positionX < width;
       },
 
       isTop: ({ mousePosition, viewPort }) => {
-        const height = viewPort.height * RATIO_Y;
-        const positionY = mousePosition.y;
+        const height = viewPort!.height * RATIO_Y;
+        const positionY = mousePosition!.y;
         return positionY < height;
+      },
+
+      allPropsAreDefined: ({
+        coords,
+        mousePosition,
+        toolTipSize,
+        viewPort,
+      }) => {
+        const out =
+          !!coords && !!mousePosition && !!toolTipSize && !!viewPort;
+
+        return out;
       },
     },
 
     actions: {
       positionRight: assign((context) => {
         context.positionX =
-          context.coords.left -
-          context.toolTipSize.width -
+          context.coords!.left -
+          context.toolTipSize!.width -
           SPACE_FOR_TOOLTIP;
       }),
 
       positionLeft: assign((context) => {
         context.positionX =
-          context.coords.left + context.coords.width + SPACE_FOR_TOOLTIP;
+          context.coords!.left + context.coords!.width + SPACE_FOR_TOOLTIP;
       }),
 
       positionBottom: assign((context) => {
         context.positionY =
-          context.coords.top - SPACE_FOR_TOOLTIP - context.coords.height;
+          context.coords!.top - SPACE_FOR_TOOLTIP - context.coords!.height;
       }),
 
       positionTop: assign((context) => {
-        context.positionY = context.coords.top + SPACE_FOR_TOOLTIP;
+        context.positionY = context.coords!.top + SPACE_FOR_TOOLTIP;
       }),
+
+      assignProps: assignM((_, { props }) => props),
     },
   }
 );

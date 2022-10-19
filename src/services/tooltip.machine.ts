@@ -1,5 +1,6 @@
 import { assign, createMachine } from 'xstate';
-import { servicePosition } from './positionTooltip.machine';
+import { send } from 'xstate/lib/actions';
+import { positionTooltipMachine } from './positionTooltip.machine';
 import type { Context, Events, Position, Services } from './tooltip.types';
 
 const DEFAULT_TIME_TO_SHOW = 300;
@@ -37,39 +38,33 @@ export const tooltipMachine = createMachine(
       enter: {
         initial: 'hide',
         on: {
-          MOUSE_LEAVE: 'leave',
+          MOUSE_LEAVE: 'leave.waiting',
         },
         states: {
           show: {
-            initial: 'checking',
+            entry: ['forwardProps'],
+            id: 'show',
             after: {
-              TIME_TO_HIDE: 'hide',
+              TIME_TO_HIDE: '#hide',
             },
             on: {
               MOUSE_MOVE: {
+                // target: 'position',
+                actions: ['setMousePosition'],
                 target: 'show',
-                actions: 'setMousePosition',
-                internal: false,
               },
             },
-            states: {
-              checking: {
-                always: {
-                  target: 'position',
-                  cond: 'allValuesAreDefined',
-                },
-              },
-              position: {
-                invoke: {
-                  src: 'positionTooltip',
-                  onDone: {
-                    actions: 'getPosition',
-                  },
-                },
+            invoke: {
+              id: 'positionTooltipMachine',
+              src: 'positionTooltipMachine',
+              onDone: {
+                actions: 'getPosition',
               },
             },
+            // initial: 'idle',
           },
           hide: {
+            id: 'hide',
             entry: ['hide'],
             on: {
               MOUSE_MOVE: {
@@ -80,20 +75,26 @@ export const tooltipMachine = createMachine(
           },
           waiting: {
             after: {
-              TIME_TO_SHOW: {
-                target: 'show',
-                actions: [],
-                internal: false,
-              },
+              TIME_TO_SHOW: 'show',
             },
           },
         },
       },
       leave: {
-        entry: 'hide',
         on: {
           MOUSE_ENTER: {
             target: 'enter',
+          },
+        },
+        initial: 'idle',
+        states: {
+          idle: {
+            entry: ['hide'],
+          },
+          waiting: {
+            after: {
+              TIME_TO_SHOW: 'idle',
+            },
           },
         },
       },
@@ -124,14 +125,22 @@ export const tooltipMachine = createMachine(
       getTooltipSize: assign({
         toolTipSize: (_, { size }) => size,
       }),
+
+      forwardProps: send(
+        ({ timeToHide, timeToShow, position, ...props }) => ({
+          type: 'GET_PROPS',
+          props,
+        }),
+        { to: 'positionTooltipMachine' }
+      ),
     },
 
-    guards: {
-      allValuesAreDefined: ({ coords, mousePosition, viewPort }) => {
-        const out = !!coords && !!mousePosition && !!viewPort;
-        return out;
-      },
-    },
+    // guards: {
+    //   allValuesAreDefined: ({ coords, mousePosition, viewPort }) => {
+    //     const out = !!coords && !!mousePosition && !!viewPort;
+    //     return out;
+    //   },
+    // },
 
     delays: {
       TIME_TO_HIDE: ({ timeToHide }) => timeToHide ?? DEFAULT_TIME_TO_HIDE,
@@ -139,18 +148,7 @@ export const tooltipMachine = createMachine(
     },
 
     services: {
-      positionTooltip: ({
-        mousePosition,
-        toolTipSize,
-        coords,
-        viewPort,
-      }) =>
-        servicePosition({
-          coords: coords!,
-          mousePosition: mousePosition!,
-          toolTipSize: toolTipSize!,
-          viewPort: viewPort!,
-        }),
+      positionTooltipMachine,
     },
   }
 );

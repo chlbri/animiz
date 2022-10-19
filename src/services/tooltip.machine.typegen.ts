@@ -3,22 +3,28 @@
 export interface Typegen0 {
   "@@xstate/typegen": true;
   internalEvents: {
-    "": { type: "" };
-    "done.invoke.tooltip.enter.show.position:invocation[0]": {
-      type: "done.invoke.tooltip.enter.show.position:invocation[0]";
+    "done.invoke.positionTooltipMachine": {
+      type: "done.invoke.positionTooltipMachine";
       data: unknown;
       __tip: "See the XState TS docs to learn how to strongly type this.";
     };
-    "xstate.after(TIME_TO_HIDE)#tooltip.enter.show": {
-      type: "xstate.after(TIME_TO_HIDE)#tooltip.enter.show";
+    "error.platform.positionTooltipMachine": {
+      type: "error.platform.positionTooltipMachine";
+      data: unknown;
+    };
+    "xstate.after(TIME_TO_HIDE)#show": {
+      type: "xstate.after(TIME_TO_HIDE)#show";
     };
     "xstate.after(TIME_TO_SHOW)#tooltip.enter.waiting": {
       type: "xstate.after(TIME_TO_SHOW)#tooltip.enter.waiting";
     };
+    "xstate.after(TIME_TO_SHOW)#tooltip.leave.waiting": {
+      type: "xstate.after(TIME_TO_SHOW)#tooltip.leave.waiting";
+    };
     "xstate.init": { type: "xstate.init" };
   };
   invokeSrcNameMap: {
-    positionTooltip: "done.invoke.tooltip.enter.show.position:invocation[0]";
+    positionTooltipMachine: "done.invoke.positionTooltipMachine";
   };
   missingImplementations: {
     actions: never;
@@ -27,43 +33,41 @@ export interface Typegen0 {
     delays: never;
   };
   eventsCausingActions: {
-    getPosition: "done.invoke.tooltip.enter.show.position:invocation[0]";
+    forwardProps:
+      | "MOUSE_MOVE"
+      | "xstate.after(TIME_TO_SHOW)#tooltip.enter.waiting";
+    getPosition: "done.invoke.positionTooltipMachine";
     getTooltipSize: "GET_TOOLTIP";
     hide:
       | "MOUSE_ENTER"
       | "MOUSE_LEAVE"
-      | "xstate.after(TIME_TO_HIDE)#tooltip.enter.show"
+      | "xstate.after(TIME_TO_HIDE)#show"
+      | "xstate.after(TIME_TO_SHOW)#tooltip.leave.waiting"
       | "xstate.init";
     setCoords: "GET_COORDS";
     setMousePosition: "MOUSE_MOVE";
     setWindowDimensions: "GET_VIEWPORT";
   };
   eventsCausingServices: {
-    positionTooltip: "";
+    positionTooltipMachine:
+      | "MOUSE_MOVE"
+      | "xstate.after(TIME_TO_SHOW)#tooltip.enter.waiting";
   };
-  eventsCausingGuards: {
-    allValuesAreDefined: "";
-  };
+  eventsCausingGuards: {};
   eventsCausingDelays: {
     TIME_TO_HIDE:
       | "MOUSE_MOVE"
       | "xstate.after(TIME_TO_SHOW)#tooltip.enter.waiting";
-    TIME_TO_SHOW: "MOUSE_MOVE";
+    TIME_TO_SHOW: "MOUSE_LEAVE" | "MOUSE_MOVE";
   };
   matchesStates:
     | "enter"
     | "enter.hide"
     | "enter.show"
-    | "enter.show.checking"
-    | "enter.show.position"
     | "enter.waiting"
     | "leave"
-    | {
-        enter?:
-          | "hide"
-          | "show"
-          | "waiting"
-          | { show?: "checking" | "position" };
-      };
+    | "leave.idle"
+    | "leave.waiting"
+    | { enter?: "hide" | "show" | "waiting"; leave?: "idle" | "waiting" };
   tags: never;
 }

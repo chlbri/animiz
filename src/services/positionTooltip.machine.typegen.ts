@@ -14,6 +14,7 @@ export interface Typegen0 {
     delays: never;
   };
   eventsCausingActions: {
+    assignProps: "GET_PROPS";
     positionBottom: "";
     positionLeft: "";
     positionRight: "";
@@ -21,10 +22,11 @@ export interface Typegen0 {
   };
   eventsCausingServices: {};
   eventsCausingGuards: {
+    allPropsAreDefined: "";
     isLeft: "";
     isTop: "";
   };
   eventsCausingDelays: {};
-  matchesStates: "final" | "positionX" | "positionY";
+  matchesStates: "checking" | "final" | "idle" | "positionX" | "positionY";
   tags: never;
 }

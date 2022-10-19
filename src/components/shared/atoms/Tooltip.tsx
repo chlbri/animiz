@@ -1,13 +1,13 @@
 /** @jsxImportSource solid-js */
 
 import { Accessor, Component, createEffect, Show } from 'solid-js';
-import type { Position, Size } from 'src/services/tooltip.types';
+import type { Size } from 'src/services/tooltip.types';
 
 type Props = {
   title?: string;
   summary: string;
   getSize: (size: Size) => void;
-  position: Accessor<Position>;
+  position: Accessor<string | undefined>;
   show: Accessor<boolean>;
 };
 
@@ -35,7 +35,7 @@ export const Tooltip: Component<Props> = ({
         'pointer-events-auto opacity-100': show(),
       }}
       style={{
-        transform: `translate(${position().x}px, ${position().y}px)`,
+        transform: position(),
         transition: 'opacity 3.5',
       }}
     >

@@ -2,10 +2,7 @@
 
 import { Component, createEffect, JSX } from 'solid-js';
 import { createInterpret } from 'src/services/createInterpret';
-import {
-  DEFAULT_POSITION,
-  tooltipMachine,
-} from 'src/services/tooltip.machine';
+import { tooltipMachine } from 'src/services/tooltip.machine';
 import type { Coords, Position, Size } from 'src/services/tooltip.types';
 import { Tooltip } from '../atoms/Tooltip';
 
@@ -15,26 +12,40 @@ type Props = {
   tooltipSummary: string;
 };
 
-const { context, matches, send, subscribe } =
-  createInterpret(tooltipMachine);
-
 export const WithTooltip: Component<Props> = ({
   children,
   tooltipTitle,
   tooltipSummary,
 }) => {
+  // #region Preparation
   let ref: HTMLDivElement;
 
-  const showTooltip = matches('enter.show');
-  const getTooltipSize = (size: Size) =>
-    send({ type: 'GET_TOOLTIP', size });
-  const position = context(
-    (context) => context.position ?? DEFAULT_POSITION
+  const { context, matches, send } = createInterpret(
+    tooltipMachine.withContext({ timeToShow: 600 })
   );
 
-  // subscribe((state) => {
-  //   console.log(state.context.position);
-  // });
+  const mouseEvents = {
+    onMouseEnter: () => send('MOUSE_ENTER'),
+    onMouseLeave: () => send('MOUSE_LEAVE'),
+
+    onMouseMove: (event: MouseEvent) => {
+      const position: Position = {
+        x: event.clientX,
+        y: event.clientY,
+      };
+      send({ type: 'MOUSE_MOVE', position });
+    },
+  };
+
+  const tooltipProps = {
+    title: tooltipTitle,
+    summary: tooltipSummary,
+    show: matches('enter.show'),
+    getSize: (size: Size) => send({ type: 'GET_TOOLTIP', size }),
+    position: context((context) => context.position),
+  };
+  // #endregion
+
   createEffect(() => {
     const size: Size = {
       width: window.innerWidth,
@@ -51,36 +62,14 @@ export const WithTooltip: Component<Props> = ({
     send({ type: 'GET_COORDS', coords });
   });
 
-  createEffect(() => {
-    console.log(matches('enter.show')());
-  });
-
   return (
     <div
       ref={ref!}
-      class='relative w-max flex'
-      onMouseEnter={() => {
-        send('MOUSE_ENTER');
-      }}
-      onMouseLeave={() => {
-        send('MOUSE_LEAVE');
-      }}
-      onMouseMove={(event) => {
-        const position: Position = {
-          x: event.clientX,
-          y: event.clientY,
-        };
-        send({ type: 'MOUSE_MOVE', position });
-      }}
+      class='relative w-max flex cursor-pointer hover:cursor-help transition duration-500'
+      {...mouseEvents}
     >
       {children}
-      <Tooltip
-        title={tooltipTitle}
-        summary={tooltipSummary}
-        show={showTooltip}
-        getSize={getTooltipSize}
-        position={position}
-      />
+      <Tooltip {...tooltipProps} />
     </div>
   );
 };

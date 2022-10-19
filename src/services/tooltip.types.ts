@@ -17,7 +17,7 @@ export type Coords = {
 
 export type Context = {
   mousePosition?: Position;
-  position?: Position;
+  position?: string;
   coords?: Coords;
   viewPort?: Size;
   toolTipSize?: Size;
@@ -26,12 +26,13 @@ export type Context = {
 };
 
 export type Events =
-  | { type: 'MOUSE_ENTER' | 'MOUSE_LEAVE' }
+  | { type: 'MOUSE_LEAVE' }
+  | { type: 'MOUSE_ENTER' }
   | { type: 'GET_TOOLTIP'; size: Size }
   | { type: 'GET_VIEWPORT'; size: Size }
   | { type: 'GET_COORDS'; coords: Coords }
   | { type: 'MOUSE_MOVE'; position: Position };
 
 export type Services = {
-  positionTooltip: { data: Position | undefined };
+  positionTooltipMachine: { data: string | undefined };
 };
