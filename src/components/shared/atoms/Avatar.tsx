@@ -1,16 +1,21 @@
 /** @jsxImportSource solid-js */
 
-import type { Accessor, Component } from 'solid-js';
+import { Component, createSignal } from 'solid-js';
 import { ArrowToggle } from '../molecules/ArrowToggle';
 
 type Props = {
   src?: string;
-  open: Accessor<boolean>;
 };
 
-export const Avatar: Component<Props> = ({ src, open }) => {
+export const Avatar: Component<Props> = ({ src }) => {
+  const [open, setOpen] = createSignal(false);
   return (
-    <button class='flex items-center space-x-2 text-xs'>
+    <button
+      class='flex items-center space-x-2 text-xs'
+      onClick={() => {
+        setOpen((open) => !open);
+      }}
+    >
       <img
         src={src}
         alt='Avatar'

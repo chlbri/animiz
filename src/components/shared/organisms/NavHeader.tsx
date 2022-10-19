@@ -17,7 +17,7 @@ export const NavHeader: Component<Props> = ({}) => {
           <button>
             <SearchIcon class='w-5 h-5' />
           </button>
-          <Avatar open={() => true} />
+          <Avatar />
         </div>
       </div>
     </header>

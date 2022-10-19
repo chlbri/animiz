@@ -10,12 +10,19 @@ type Props = {
 
 export const ArrowToggle: Component<Props> = ({ open }) => {
   return (
-    <span>
-      {open() ? (
-        <ArrowDownIcon class='w-7 h-7' />
-      ) : (
-        <ArrowUpIcon class='w-7 h-7' />
-      )}
+    <span class='relative w-7 h-7'>
+      <div
+        class='absolute inset-0 opacity-0 pointer-events-none transition-opacity ease-out duration-300'
+        classList={{ 'pointer-events-auto opacity-100': open() }}
+      >
+        <ArrowDownIcon class='h-full w-full' />
+      </div>
+      <div
+        class='absolute inset-0 opacity-0 pointer-events-none transition-opacity ease-out duration-300'
+        classList={{ 'pointer-events-auto opacity-100': !open() }}
+      >
+        <ArrowUpIcon class='h-full w-full' />
+      </div>
     </span>
   );
 };
