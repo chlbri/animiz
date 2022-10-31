@@ -1,5 +1,4 @@
 import { decompose, StateValue } from '@bemedev/decompose';
-import type { Accessor } from 'solid-js';
 
 export type MatchOptions =
   | {

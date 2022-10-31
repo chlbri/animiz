@@ -1,7 +1,7 @@
 /** @jsxImportSource solid-js */
 
 import { Component, createSignal } from 'solid-js';
-import { ArrowToggle } from '../molecules/ArrowToggle';
+import { ArrowToggle } from './ArrowToggle';
 
 type Props = {
   src?: string;
