@@ -9,7 +9,9 @@ type Props = {
 };
 
 const Image: Component<Props> = (props) => {
-  return <ImageA format='webp' aspectRatio='7/10' width='100%' {...props} />;
+  return (
+    <ImageA format='webp' aspectRatio='7:10' width='w-32' {...props} />
+  );
 };
 
 export default Image;

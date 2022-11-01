@@ -3,22 +3,22 @@
 import type { Component } from 'solid-js';
 import Image from '../atoms/Image';
 
-type Props = {
+export type CardProps = {
   title: string;
   alt: string;
   src?: string;
 };
 
-const Card: Component<Props> = ({
+const Card: Component<CardProps> = ({
   title,
   src = '/image/defaultCardImage.jpeg',
   alt,
 }) => {
   return (
-    <div class='flex flex-col space-y-2'>
+    <li class='flex flex-col space-y-2'>
       <Image src={src} alt={alt} />
       <span>{title}</span>
-    </div>
+    </li>
   );
 };
 

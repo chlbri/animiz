@@ -1,8 +1,14 @@
 ---
 import MainLayout from '~shared/MainLayout.astro';
+import Section from './_components/organisms/Section';
 import SearchBar from './_components/templates/SearchBar';
 ---
 
 <MainLayout title='Mangas'>
-  <SearchBar client:idle />
+  <div class='flex-1 flex flex-col space-y-8'>
+    <SearchBar client:idle />
+    <div>
+      <Section />
+    </div>
+  </div>
 </MainLayout>
