@@ -1,11 +1,12 @@
 /** @jsxImportSource solid-js */
 
 import type { Component } from 'solid-js';
-import FilterAiringStatus from '../molecules/FilterAiring';
-import FilterFormats from '../molecules/FilterFormats';
-import FilterGenres from '../molecules/FilterGenres';
-import FilterText from '../molecules/FilterText';
-import FilterYears from '../molecules/FilterYears';
+import FilterAiringStatus from '../organisms/FilterAiring';
+import FilterCountries from '../organisms/FilterCountries';
+import FilterFormats from '../organisms/FilterFormats';
+import FilterGenres from '../organisms/FilterGenres';
+import FilterText from '../organisms/FilterText';
+import FilterYears from '../organisms/FilterYears';
 
 type Props = {};
 
@@ -17,6 +18,7 @@ const SearchBar: Component<Props> = ({}) => {
       <FilterYears />
       <FilterFormats />
       <FilterAiringStatus />
+      <FilterCountries />
     </div>
   );
 };
