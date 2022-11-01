@@ -11,13 +11,15 @@ export type CardProps = {
 
 const Card: Component<CardProps> = ({
   title,
-  src = '/image/defaultCardImage.jpeg',
+  src = '/images/defaultCardImage.jpeg',
   alt,
 }) => {
   return (
-    <li class='flex flex-col space-y-2'>
-      <Image src={src} alt={alt} />
-      <span>{title}</span>
+    <li class='inline-block w-full xs:w-1/2 md:w-1/4 lg:w-1/6 xl:w-[10%] 2xl:w-1/12'>
+      <div class='flex flex-col space-y-1.5'>
+        <Image src={src} alt={alt} />
+        <span class='font-bold pl-3'>{title}</span>
+      </div>
     </li>
   );
 };

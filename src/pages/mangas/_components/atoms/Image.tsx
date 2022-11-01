@@ -1,6 +1,5 @@
 /** @jsxImportSource solid-js */
 
-import { Image as ImageA } from '@astrojs/image/components';
 import type { Component } from 'solid-js';
 
 type Props = {
@@ -9,9 +8,7 @@ type Props = {
 };
 
 const Image: Component<Props> = (props) => {
-  return (
-    <ImageA format='webp' aspectRatio='7:10' width='w-32' {...props} />
-  );
+  return <img {...props} class='aspect-[7/10] w-full' />;
 };
 
 export default Image;
