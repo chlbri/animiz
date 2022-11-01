@@ -22,7 +22,7 @@ const tailwind = {
       },
     },
   },
-  plugins: [],
+  plugins: [require('tailwind-scrollbar-hide')],
 };
 
 module.exports = tailwind;

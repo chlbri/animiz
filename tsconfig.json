@@ -47,6 +47,7 @@
       "~utils/*": ["src/utils/*"],
       "~hooks/*": ["src/hooks/*"],
       "~backend/*": ["src/backend/*"],
+      "~shared/*": ["src/pages/_shared/*"],
       "~constants/*": ["src/constants/*"]
     }
   }

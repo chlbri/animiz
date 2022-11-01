@@ -1,15 +1,10 @@
-import type { Lang, LangKey } from 'src/langs';
-import type { Theme, ThemeKey } from 'src/themes';
+import type { ThemeColors } from './../themes';
 
-export type Events =
-  | { type: 'CHANGE_LANG'; theme: LangKey }
-  | { type: 'CHANGE_THEME'; theme: ThemeKey }
-  | { type: 'TOGGLE' };
+export type Events = { type: 'CHANGE_THEME'; theme: ThemeColors };
 
 export type Context = {
-  langs: Lang;
   ui: {
-    theme: Theme;
+    colors: ThemeColors;
     components: {};
   };
   cache: {};
@@ -17,6 +12,4 @@ export type Context = {
 
 export type Services = {
   hydration: { data: any };
-  lang: { data: Lang };
-  theme: { data: Theme };
 };

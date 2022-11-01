@@ -1,16 +1,24 @@
 /** @jsxImportSource solid-js */
 
-import { Component, For } from 'solid-js';
+import { Component, For, onMount } from 'solid-js';
 import { NavLink } from '../atoms/NavLink';
+import { LIST } from './NavItems.data';
 
-const LIST = ['Home', 'Profile', 'Animes', 'Mangas'];
+type Props = {
+};
 
-type Props = {};
+export const NavItems: Component<Props> = ({  }) => {
+  onMount(() => {
+    console.log(window.location.pathname);
+  });
 
-export const NavItems: Component<Props> = ({}) => {
   return (
     <nav class='flex space-x-12 font-family-overpass items-center text-sm'>
-      <For each={LIST}>{(item) => <NavLink>{item}</NavLink>}</For>
+      <For each={LIST}>
+        {(item) => (
+          <NavLink {...item}  />
+        )}
+      </For>
     </nav>
   );
 };

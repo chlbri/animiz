@@ -21,7 +21,7 @@ export const Avatar: Component<Props> = ({ src }) => {
         alt='Avatar'
         class='w-9 h-7 rounded border border-yellow-600 bg-white'
       />
-      <ArrowToggle open={open} />
+      <ArrowToggle open={open} class='w-7 aspect-square' />
     </button>
   );
 };

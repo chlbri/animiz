@@ -1,7 +1,7 @@
 /** @jsxImportSource solid-js */
 
 import type { Component, JSX } from 'solid-js';
-import { useTooltip } from '~hooks/useTooltip';
+import { useTooltip } from '~hooks/tooltip';
 import { Tooltip, TootltipProps } from '../atoms/Tooltip';
 
 type Props = {

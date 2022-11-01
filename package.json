@@ -24,9 +24,11 @@
     "@fontsource/roboto": "^4.5.8",
     "@xstate/immer": "^0.3.1",
     "astro": "^1.5.2",
+    "class-variance-authority": "^0.2.4",
     "dequal": "^2.0.3",
     "immer": "^9.0.16",
     "solid-js": "^1.6.0",
+    "tailwind-scrollbar-hide": "^1.1.7",
     "tailwindcss": "^3.2.1",
     "xstate": "^4.33.6"
   },

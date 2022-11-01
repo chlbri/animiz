@@ -1,0 +1,12 @@
+---
+import MainLayout from '~shared/MainLayout.astro';
+import { WithTooltip } from '~shared/molecules/WithTooltip';
+---
+
+<MainLayout title='Test tooltip'>
+  <div class='flex h-full flex-1 items-center justify-center'>
+    <WithTooltip summary='Nabilla dfsdfd' client:load>
+      <div>Allo quoi ??</div>
+    </WithTooltip>
+  </div>
+</MainLayout>
