@@ -1,6 +1,6 @@
 /** @jsxImportSource solid-js */
 
-import type { Component } from 'solid-js';
+import { Component, createEffect } from 'solid-js';
 import { SearchIcon } from '../atoms/icons/Search';
 import { Avatar } from '../molecules/Avatar';
 import { NavItems } from '../molecules/NavItems';
@@ -8,6 +8,12 @@ import { NavItems } from '../molecules/NavItems';
 type Props = {};
 
 export const NavHeader: Component<Props> = ({}) => {
+  createEffect(() => {
+    console.log(
+      Array.from(new URL(window.location.href).searchParams.values())
+    );
+  });
+
   return (
     <header class='w-full h-14 bg-blue_black flex items-center px-10 text-gray-400 justify-center'>
       <div class='flex w-full justify-between max-w-7xl'>

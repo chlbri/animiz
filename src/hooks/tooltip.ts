@@ -8,22 +8,52 @@ import type {
   Size,
 } from 'src/services/tooltip.types';
 
-export function useTooltip(
-  ref: Accessor<HTMLElement | null>,
-  context?: Pick<Context, 'timeToHide' | 'timeToShow'>
-) {
-  const machine = context
-    ? tooltipMachine.withContext(context)
+function prepare(options?: Pick<Context, 'timeToHide' | 'timeToShow'>) {
+  const machine = options
+    ? tooltipMachine.withContext(options)
     : tooltipMachine;
 
-  const { context: getContext, matches, send } = createInterpret(machine);
+  const {
+    context: getContext,
+    matches,
+    sender,
+  } = createInterpret(machine);
 
-  createEffect(() => {
+  const mouseLeave = sender('MOUSE_LEAVE');
+  const mouseEnter = sender('MOUSE_ENTER');
+  const mouseMove = sender('MOUSE_MOVE');
+  const getCoords = sender('GET_COORDS');
+  const getTooltip = sender('GET_TOOLTIP');
+  const getViewport = sender('GET_VIEWPORT');
+
+  return {
+    getContext,
+    matches,
+    mouseLeave,
+    mouseEnter,
+    mouseMove,
+    getCoords,
+    getTooltip,
+    getViewport,
+  } as const;
+}
+
+type _Prepare = ReturnType<typeof prepare>;
+type Prepare<K extends keyof _Prepare = keyof _Prepare> = Pick<
+  _Prepare,
+  K
+>;
+
+function createSizeEffect<T extends HTMLElement>(
+  ref: Accessor<T | null>,
+  { getViewport, getCoords }: Prepare<'getViewport' | 'getCoords'>
+) {
+  return createEffect(() => {
     const size: Size = {
       width: window.innerWidth,
       height: window.innerHeight,
     };
-    send({ type: 'GET_VIEWPORT', size });
+    getViewport({ size });
 
     const _ref = ref();
     if (_ref) {
@@ -33,28 +63,66 @@ export function useTooltip(
         width: _ref.clientWidth,
         height: _ref.clientHeight,
       };
-      send({ type: 'GET_COORDS', coords });
+      getCoords({ coords });
     }
   });
+}
 
-  const mouseEvents = {
-    onMouseEnter: () => send('MOUSE_ENTER'),
-    onMouseLeave: () => send('MOUSE_LEAVE'),
+function createMouseEvents({
+  mouseEnter,
+  mouseLeave,
+  mouseMove,
+}: Prepare<'mouseEnter' | 'mouseLeave' | 'mouseMove'>) {
+  return {
+    onMouseEnter: () => mouseEnter(),
+    onMouseLeave: () => mouseLeave(),
 
     onMouseMove: (event: MouseEvent) => {
       const position: Position = {
         x: event.clientX,
         y: event.clientY,
       };
-      send({ type: 'MOUSE_MOVE', position });
+      mouseMove({ position });
     },
-  };
+  } as const;
+}
 
-  const tooltipProps = {
+function createTootltip({
+  getTooltip,
+  getContext,
+  matches,
+}: Prepare<'getContext' | 'getTooltip' | 'matches'>) {
+  return {
     show: matches('enter.show'),
-    getSize: (size: Size) => send({ type: 'GET_TOOLTIP', size }),
+    getTooltip,
     position: getContext((context) => context.position),
   };
+}
+
+export default function useTooltip<T extends HTMLElement>(
+  ref: Accessor<T | null>,
+  options?: Pick<Context, 'timeToHide' | 'timeToShow'>
+) {
+  const {
+    getContext,
+    matches,
+    mouseLeave,
+    mouseEnter,
+    mouseMove,
+    getCoords,
+    getTooltip,
+    getViewport,
+  } = prepare(options);
+
+  createSizeEffect<T>(ref, { getViewport, getCoords });
+
+  const mouseEvents = createMouseEvents({
+    mouseEnter,
+    mouseLeave,
+    mouseMove,
+  });
+
+  const tooltipProps = createTootltip({ matches, getTooltip, getContext });
 
   return { mouseEvents, tooltipProps } as const;
 }

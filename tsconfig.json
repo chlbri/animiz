@@ -38,16 +38,18 @@
     // Report an error for unused labels instead of just a warning.
     "allowUnusedLabels": false,
     // #endregion
-
+    "types": ["vitest/globals"],
     "baseUrl": ".",
     "paths": {
       "~components/*": ["src/components/*"],
       "~layouts/*": ["src/layouts/*"],
       "~utils/*": ["src/utils/*"],
       "~hooks/*": ["src/hooks/*"],
-      "~backend/*": ["src/backend/*"],
+      "~services/*": ["src/services/*"],
       "~shared/*": ["src/pages/_shared/*"],
-      "~constants/*": ["src/constants/*"]
+      "~constants/*": ["src/constants/*"],
+      "~data": ["public/json/data.json"]
     }
-  }
+  },
+  "exclude": ["**/*.test.ts"]
 }

@@ -13,5 +13,11 @@ export default function useDefaultDropdownFilter<
   const _list = [...list];
   _list.unshift('Any');
 
-  return { canBeOpened, toggle, current, filter, list: () => _list };
+  return {
+    canBeOpened,
+    toggle,
+    current,
+    filter,
+    list: () => _list as ['Any', ...T],
+  };
 }

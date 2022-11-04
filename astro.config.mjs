@@ -7,4 +7,5 @@ import image from '@astrojs/image';
 
 export default defineConfig({
   integrations: [tailwind(), solidJs(), image()],
+  output: 'server',
 });

@@ -6,7 +6,7 @@ import type { Size } from 'src/services/tooltip.types';
 export type TootltipProps = {
   title?: string;
   summary: string;
-  getSize: (size: Size) => void;
+  getTooltip: (value:{size: Size}) => void;
   position: Accessor<string | undefined>;
   show: Accessor<boolean>;
 };
@@ -15,7 +15,7 @@ export const Tooltip: Component<TootltipProps> = ({
   title,
   summary,
   position,
-  getSize,
+  getTooltip,
   show,
 }) => {
   let ref: HTMLDivElement;
@@ -25,7 +25,7 @@ export const Tooltip: Component<TootltipProps> = ({
       width: ref.clientWidth,
       height: ref.clientHeight,
     };
-    getSize(size);
+    getTooltip({size});
   });
   return (
     <div

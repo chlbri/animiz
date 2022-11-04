@@ -28,6 +28,7 @@
     "class-variance-authority": "^0.2.4",
     "dequal": "^2.0.3",
     "immer": "^9.0.16",
+    "nanoid": "^4.0.0",
     "sharp": ">=0.31.0",
     "solid-js": "^1.6.0",
     "tailwind-scrollbar-hide": "^1.1.7",
@@ -36,6 +37,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.19.6",
+    "image-downloader": "^4.3.0",
+    "node-fetch": "^3.2.10",
     "vite": "^3.1.8",
     "vite-tsconfig-paths": "^3.5.2",
     "vitest": "^0.24.3"

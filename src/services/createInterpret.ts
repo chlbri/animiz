@@ -1,3 +1,4 @@
+import type { LengthOf, TuplifyUnion } from '@bemedev/core';
 import { Accessor, createMemo, createRoot, from } from 'solid-js';
 import {
   BaseActionObject,
@@ -14,6 +15,19 @@ import {
   Typestate,
 } from 'xstate';
 import { matches as matchesD, MatchOptions } from '~utils/machine';
+
+export type SenderProps<
+  TEvent extends EventObject = EventObject,
+  T extends TEvent['type'] = string
+> = TEvent extends { type: T } & infer U
+  ? LengthOf<TuplifyUnion<Omit<U, 'type'>>> extends 0
+    ? never
+    : [Omit<U, 'type'>]
+  : never;
+
+type T1 = { type: 'eerer'; arg: 2 } | { type: 'two' };
+
+type T2 = Extract<T1, { type: 'two' }>;
 
 export function createInterpret<
   TContext,
@@ -83,7 +97,26 @@ export function createInterpret<
     );
   };
 
+  const sender = <T extends TEvent['type']>(type: T) => {
+    type E = TEvent extends { type: T } & infer U
+      ? LengthOf<TuplifyUnion<Extract<U, { type: T }>>> extends 0
+        ? []
+        : [Omit<U, 'type'>]
+      : never;
+
+    const func = (...[event]: E) => {
+      if (event) {
+        service.send({ type, ...event } as any);
+      } else {
+        event;
+        service.send(type);
+      }
+    };
+    return func;
+  };
+
   const output = {
+    sender,
     send: service.send,
     subscribe: service.subscribe.bind(service),
     matches,

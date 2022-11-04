@@ -1,7 +1,7 @@
 /** @jsxImportSource solid-js */
 
 import type { Component, JSX } from 'solid-js';
-import { useTooltip } from '~hooks/tooltip';
+import useTooltip from '~hooks/tooltip';
 import { Tooltip, TootltipProps } from '../atoms/Tooltip';
 
 type Props = {
@@ -16,27 +16,27 @@ export const WithTooltip: Component<Props> = ({
   summary,
 }) => {
   // #region Preparation
-  let ref: any = null;
+  let ref: HTMLDivElement|null = null;
 
-  const { mouseEvents, tooltipProps: props } = useTooltip(() => ref, {
+  const { mouseEvents, tooltipProps } = useTooltip(() => ref, {
     timeToShow: 600,
   });
 
-  const tooltipProps: TootltipProps = {
+  const props: TootltipProps = {
     title,
     summary,
-    ...props,
+    ...tooltipProps, 
   };
   // #endregion
 
   return (
     <div
-      ref={ref}
+      ref={ref!}
       class='relative w-max flex cursor-pointer hover:cursor-help transition duration-500'
       {...mouseEvents}
     >
       {children}
-      <Tooltip {...tooltipProps} />
+      <Tooltip {...props} />
     </div>
   );
 };
