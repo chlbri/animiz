@@ -532,11 +532,11 @@ describe('Testing service', () => {
         context(true, (context) => context.editing);
       });
 
-      test('sends input to parent', () => {
+      test('Sends input to parent', () => {
         expect(sendParentInput).toBeCalledTimes(1);
       });
 
-      test('current is assigned', () => {
+      test('Current is assigned', () => {
         context(inputs, (context) => context.current);
       });
 
@@ -544,7 +544,7 @@ describe('Testing service', () => {
         context(undefined, (context) => context.previous);
       });
 
-      test('Wait the throttle time', () => advanceByTime(THROTTLE_TIME));
+      test('Wait the throttle time 1', () => advanceByTime(THROTTLE_TIME));
 
       test('Editing is false', () => {
         context(false, (context) => context.editing);
@@ -558,9 +558,9 @@ describe('Testing service', () => {
         expect(startQuery).toBeCalledTimes(1);
       });
 
-      test('Send Inputs', () => send(inputs));
+      test('Send Inputs again', () => send(inputs));
 
-      test('sends input to parent', () => {
+      test('Sends input to parent twice', () => {
         expect(sendParentInput).toBeCalledTimes(2);
       });
 
@@ -568,7 +568,7 @@ describe('Testing service', () => {
         context(true, (context) => context.current === context.previous);
       });
 
-      test('Wait the throttle time', () => advanceByTime(THROTTLE_TIME));
+      test('Wait the throttle time 2', () => advanceByTime(THROTTLE_TIME));
 
       test('Query is not sended', () => {
         expect(startQuery).toBeCalledTimes(1);
@@ -596,11 +596,11 @@ describe('Testing service', () => {
         });
       });
 
-      test('sends input to parent', () => {
+      test('Sends input to parent', () => {
         expect(sendParentInput).toBeCalledTimes(1);
       });
 
-      test('current is assigned', () => {
+      test('Current is assigned', () => {
         context(inputs1, (context) => context.current);
       });
 
@@ -608,7 +608,7 @@ describe('Testing service', () => {
         context(undefined, (context) => context.previous);
       });
 
-      test('Wait the throttle time', () => advanceByTime(THROTTLE_TIME));
+      test('Wait the throttle time 1', () => advanceByTime(THROTTLE_TIME));
 
       test('Editing is false', () => {
         context(false, (context) => context.editing);
@@ -622,9 +622,10 @@ describe('Testing service', () => {
         expect(startQuery).toBeCalledTimes(1);
       });
 
-      test('Send Inputs', () => send(inputs2));
+      test('Send Inputs again, different from previous', () =>
+        send(inputs2));
 
-      test('sends input to parent', () => {
+      test('Sends input to parent twice', () => {
         expect(sendParentInput).toBeCalledTimes(2);
       });
 
@@ -632,7 +633,7 @@ describe('Testing service', () => {
         context(false, (context) => context.current === context.previous);
       });
 
-      test('Wait the throttle time', () => advanceByTime(THROTTLE_TIME));
+      test('Wait the throttle time 2', () => advanceByTime(THROTTLE_TIME));
 
       test('It starts query again', () => {
         expect(startQuery).toBeCalledTimes(2);
