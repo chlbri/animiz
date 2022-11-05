@@ -1,9 +1,15 @@
 import cloneDeep from 'lodash.clonedeep';
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
-import { EventObject } from 'xstate';
-import { DEFAULT_EVENT_DELIMITER, EVENTS } from './constants';
-import { inputsMachine } from './inputs.machine';
-import { Context, Events, Inputs } from './inputs.types';
+import { EventObject, interpret } from 'xstate';
+import { matches as matchesD } from '../utils/machine';
+import { advanceByTime } from '../utils/test';
+import {
+  DEFAULT_EVENT_DELIMITER,
+  EVENTS,
+  THROTTLE_TIME,
+} from './constants';
+import { inputsMachine, MatchesProps } from './inputs.machine';
+import type { Context, Events, Inputs } from './inputs.types';
 
 beforeAll(() => {
   vi.useFakeTimers();
@@ -14,7 +20,6 @@ afterAll(() => {
 });
 
 type Action<T = any> = (context?: Context, event?: Events) => T;
-type Guard = (context: Context, event: Events) => boolean;
 type TestHelper<T = any> = {
   context?: Context;
   event?: Events;
@@ -22,7 +27,7 @@ type TestHelper<T = any> = {
 };
 
 const generateDefaultContext = (context?: Partial<Context>) => {
-  return { name: 'Inputs', ...context } as Context;
+  return { name: 'INPUTS', ...context } as Context;
 };
 
 const isTestHelperDefined = <T>(helper: TestHelper<T>) => {
@@ -32,6 +37,7 @@ const isTestHelperDefined = <T>(helper: TestHelper<T>) => {
   return true;
 };
 
+// #region Hooks
 const useAssign = (name: string) => {
   const action = inputsMachine.options.actions?.[name] as any;
   const fn = action?.assignment;
@@ -45,6 +51,26 @@ const useAssign = (name: string) => {
   };
 
   const testExpect = (helper: TestHelper<Context>) => {
+    const checkAll = isTestHelperDefined(helper);
+    if (!checkAll) return true;
+
+    const { context, event, expected } = helper;
+    expect(mockFn(context, event)).toEqual(expected);
+  };
+
+  return [acceptance, testExpect, mockFn] as const;
+};
+
+const useGuard = (name: string) => {
+  const guard = inputsMachine.options.guards?.[name] as Action<boolean>;
+  if (!guard) throw 'Guard not exists';
+  const mockFn = vi.fn(guard);
+
+  const acceptance = () => {
+    expect(guard).toBeInstanceOf(Function);
+  };
+
+  const testExpect = (helper: TestHelper<boolean>) => {
     const checkAll = isTestHelperDefined(helper);
     if (!checkAll) return true;
 
@@ -85,6 +111,60 @@ const useSenderParent = (name: string) => {
   return [acceptance, testExpect] as const;
 };
 
+const useService = (name = 'INPUTS') => {
+  const sendParentInput = vi.fn(() => {});
+  const startQuery = vi.fn(() => {});
+  const service = interpret(
+    inputsMachine.withContext({ name }).withConfig({
+      actions: {
+        sendParentInput,
+        startQuery,
+      },
+    })
+  );
+  const send = (inputs: Inputs) => {
+    service.send({ type: 'INPUTS', inputs });
+  };
+
+  const reset = () => {
+    service.send('__RESET__');
+  };
+
+  const stop = service.stop;
+
+  const context = <T = Context>(
+    expected: T,
+    selector?: (context: Context) => T
+  ) => {
+    const innerContext = service.getSnapshot().context;
+    const actual = selector ? selector(innerContext) : innerContext;
+    expect(actual).toEqual(expected);
+  };
+
+  const matches = (...values: MatchesProps) => {
+    const value = service.getSnapshot().value;
+    const fn = matchesD(value);
+    const actual = fn(...values);
+    expect(actual).toBe(true);
+  };
+
+  const start = service.start.bind(service);
+
+  return {
+    send,
+    context,
+    matches,
+    start,
+    reset,
+    stop,
+    mocks: {
+      sendParentInput,
+      startQuery,
+    },
+  } as const;
+};
+// #endregion
+
 describe('Acceptance', () => {
   describe('Test the tests', () => {
     describe('useAssign', () => {
@@ -108,6 +188,18 @@ describe('Acceptance', () => {
       test.concurrent('Context in function Helper is undefined', () => {
         const [_, expect] = useSenderParent('resetEditing');
         expect({ expected: { type: 'any' } });
+      });
+    });
+
+    describe('useGuard', () => {
+      test.concurrent('Function not exists', () => {
+        const safe = () => useGuard('notExists');
+        expect(safe).toThrow('Guard not exists');
+      });
+
+      test.concurrent('Context in function Helper is undefined', () => {
+        const [_, expect] = useGuard('isEditing');
+        expect({ expected: true });
       });
     });
   });
@@ -192,6 +284,80 @@ describe('Acceptance', () => {
       });
     });
 
+    describe('Edit', () => {
+      const [acceptance, testExpect] = useAssign('edit');
+
+      test.concurrent('Action exists', () => {
+        acceptance();
+      });
+
+      test.concurrent('Test 1', () => {
+        const context = generateDefaultContext({
+          current: {
+            country: 'CN',
+            airingStatus: 'FINISHED',
+          },
+        });
+
+        testExpect({
+          context,
+          expected: { ...cloneDeep(context), editing: true },
+        });
+      });
+
+      test.concurrent('Test 2', () => {
+        const context = generateDefaultContext({
+          current: {
+            country: 'CN',
+            airingStatus: 'CANCELLED',
+            genres: ['Action', 'Adventure'],
+          },
+        });
+
+        testExpect({
+          context,
+          expected: { ...cloneDeep(context), editing: true },
+        });
+      });
+    });
+
+    describe('AssignPrevious', () => {
+      const [acceptance, testExpect] = useAssign('assignPrevious');
+
+      test.concurrent('Action exists', () => {
+        acceptance();
+      });
+
+      test.concurrent('Test 1', () => {
+        const context = generateDefaultContext({
+          current: {
+            country: 'CN',
+            airingStatus: 'FINISHED',
+          },
+        });
+
+        testExpect({
+          context,
+          expected: { ...cloneDeep(context), previous: context.current },
+        });
+      });
+
+      test.concurrent('Test 2', () => {
+        const context = generateDefaultContext({
+          current: {
+            country: 'CN',
+            airingStatus: 'CANCELLED',
+            genres: ['Action', 'Adventure'],
+          },
+        });
+
+        testExpect({
+          context,
+          expected: { ...cloneDeep(context), previous: context.current },
+        });
+      });
+    });
+
     describe('sendParentInput', () => {
       const [acceptance, testExpect] = useSenderParent('sendParentInput');
 
@@ -271,7 +437,206 @@ describe('Acceptance', () => {
     });
   });
 
-  describe.todo('guards', () => {
-    //TODO: test guards
+  describe('Guards', () => {
+    describe('isEditing', () => {
+      const [acceptance, testExpect] = useGuard('isEditing');
+
+      test.concurrent('Guard exists', () => {
+        acceptance();
+      });
+
+      test.concurrent('Test no editing', () => {
+        const context = generateDefaultContext();
+        testExpect({ context, expected: false });
+      });
+
+      test.concurrent('Test editing', () => {
+        const context = generateDefaultContext({ editing: true });
+        testExpect({ context, expected: true });
+      });
+    });
+
+    describe('currentEqualsPrevious', () => {
+      const [acceptance, testExpect] = useGuard('currentEqualsPrevious');
+
+      test.concurrent('Guard exists', () => {
+        acceptance();
+      });
+
+      test.concurrent(
+        'No definition for both current and previous => true',
+        () => {
+          const context = generateDefaultContext();
+          testExpect({ context, expected: true });
+        }
+      );
+
+      test.concurrent('Current is defined => false', () => {
+        const context = generateDefaultContext({
+          current: { country: 'JP' },
+        });
+        testExpect({ context, expected: false });
+      });
+
+      test.concurrent(
+        'Current and Previous are defined, but differents => false',
+        () => {
+          const context = generateDefaultContext({
+            current: { country: 'JP' },
+            previous: { country: 'KR' },
+          });
+          testExpect({ context, expected: false });
+        }
+      );
+
+      test.concurrent(
+        'Current and Previous are defined adn equals => true',
+        () => {
+          const context = generateDefaultContext({
+            current: { country: 'JP', format: 'MANGA' },
+            previous: { country: 'JP', format: 'MANGA' },
+          });
+          testExpect({ context, expected: true });
+        }
+      );
+    });
+  });
+});
+
+describe('Testing service', () => {
+  test.concurrent('Throws error if name is not defined', () => {
+    const safe = () => {
+      const service = interpret(
+        inputsMachine.withContext({} as any)
+      ).start();
+      service.send('INPUTS');
+    };
+    expect(safe).toThrowError();
+  });
+
+  describe('Workflow', () => {
+    describe('first', () => {
+      const {
+        send,
+        context,
+        start,
+        mocks: { sendParentInput, startQuery },
+      } = useService();
+      const inputs: Inputs = { country: 'CN', genres: ['Action'] };
+
+      test('Start the machine', () => start());
+
+      test('Send Inputs', () => send(inputs));
+
+      test('Editing is true', () => {
+        context(true, (context) => context.editing);
+      });
+
+      test('sends input to parent', () => {
+        expect(sendParentInput).toBeCalledTimes(1);
+      });
+
+      test('current is assigned', () => {
+        context(inputs, (context) => context.current);
+      });
+
+      test('Previous is undefined', () => {
+        context(undefined, (context) => context.previous);
+      });
+
+      test('Wait the throttle time', () => advanceByTime(THROTTLE_TIME));
+
+      test('Editing is false', () => {
+        context(false, (context) => context.editing);
+      });
+
+      test('Previous is assigned', () => {
+        context(inputs, (context) => context.previous);
+      });
+
+      test('It starts query', () => {
+        expect(startQuery).toBeCalledTimes(1);
+      });
+
+      test('Send Inputs', () => send(inputs));
+
+      test('sends input to parent', () => {
+        expect(sendParentInput).toBeCalledTimes(2);
+      });
+
+      test('Current Equals Previous', () => {
+        context(true, (context) => context.current === context.previous);
+      });
+
+      test('Wait the throttle time', () => advanceByTime(THROTTLE_TIME));
+
+      test('Query is not sended', () => {
+        expect(startQuery).toBeCalledTimes(1);
+      });
+    });
+
+    describe('second', () => {
+      const {
+        send,
+        context,
+        start,
+        mocks: { sendParentInput, startQuery },
+      } = useService();
+      const inputs1: Inputs = { country: 'CN', genres: ['Action'] };
+      const inputs2: Inputs = { country: 'KR', genres: ['Action'] };
+
+      test('Start the machine', () => start());
+
+      test('Send Inputs', () => send(inputs1));
+
+      test('Editing is true', () => {
+        context(true, (context) => {
+          context; //?
+          return context.editing;
+        });
+      });
+
+      test('sends input to parent', () => {
+        expect(sendParentInput).toBeCalledTimes(1);
+      });
+
+      test('current is assigned', () => {
+        context(inputs1, (context) => context.current);
+      });
+
+      test('Previous is undefined', () => {
+        context(undefined, (context) => context.previous);
+      });
+
+      test('Wait the throttle time', () => advanceByTime(THROTTLE_TIME));
+
+      test('Editing is false', () => {
+        context(false, (context) => context.editing);
+      });
+
+      test('Previous is assigned', () => {
+        context(inputs1, (context) => context.previous);
+      });
+
+      test('It starts query', () => {
+        expect(startQuery).toBeCalledTimes(1);
+      });
+
+      test('Send Inputs', () => send(inputs2));
+
+      test('sends input to parent', () => {
+        expect(sendParentInput).toBeCalledTimes(2);
+      });
+
+      test('Current not equals Previous', () => {
+        context(false, (context) => context.current === context.previous);
+      });
+
+      test('Wait the throttle time', () => advanceByTime(THROTTLE_TIME));
+
+      test('It starts query again', () => {
+        expect(startQuery).toBeCalledTimes(2);
+      });
+    });
   });
 });

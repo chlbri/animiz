@@ -51,6 +51,5 @@
       "~constants/*": ["src/constants/*"],
       "~data": ["public/json/data.json"]
     }
-  },
-  "exclude": ["**/*.test.ts"]
+  }
 }

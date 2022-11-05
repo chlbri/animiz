@@ -25,7 +25,10 @@ export type Context = {
   editing?: boolean;
   current?: Inputs;
   previous?: Inputs;
+  hasParent?: boolean;
   name: string;
 };
 
-export type Events = { type: 'INPUTS'; inputs: Inputs };
+export type Events =
+  | { type: 'INPUTS'; inputs: Inputs }
+  | { type: '__RESET__' };

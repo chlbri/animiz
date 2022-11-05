@@ -1,11 +1,11 @@
-import { decompose, StateValue } from '@bemedev/decompose';
+import { decompose, StateMatching, StateValue } from '@bemedev/decompose';
 
-export type MatchOptions =
+export type MatchOptions<T extends string = string> =
   | {
-      or: MatchOptions[];
+      or: MatchOptions<T>[];
     }
-  | { and: MatchOptions[] }
-  | string;
+  | { and: MatchOptions<T>[] }
+  | T;
 
 function buildMatches(
   decomposeds: readonly string[],
@@ -29,9 +29,12 @@ function buildMatches(
   return out;
 }
 
-export function matches(value: StateValue) {
+export function matches<T extends StateValue = StateValue>(value?: T) {
+  if (!value) {
+    return (..._: MatchOptions<StateMatching<T>>[]) => false;
+  }
   const decomposeds = decompose(value);
-  return (...values: MatchOptions[]) => {
+  return (...values: MatchOptions<StateMatching<T>>[]) => {
     const matchers = values.map((value) =>
       buildMatches(decomposeds, value)
     );

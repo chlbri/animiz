@@ -1,4 +1,5 @@
 import type { LengthOf, TuplifyUnion } from '@bemedev/core';
+import type { StateMatching, StateValue } from '@bemedev/decompose';
 import { Accessor, createMemo, createRoot, from } from 'solid-js';
 import {
   BaseActionObject,
@@ -91,9 +92,20 @@ export function createInterpret<
     })
   );
 
-  const matches = (...values: MatchOptions[]) => {
+  type TSV = TResolvedTypesMeta extends TypegenEnabled
+    ? Prop<Prop<TResolvedTypesMeta, 'resolved'>, 'matchesStates'>
+    : never;
+
+  type UseMatchesProps = MatchOptions<
+    StateMatching<TSV extends StateValue ? TSV : StateValue>
+  >[];
+
+  const matches = (...values: UseMatchesProps) => {
     return createRoot(() =>
-      createMemo(() => matchesD(value())(...values))
+      createMemo(() => {
+        const fn = matchesD(value());
+        return fn(...values);
+      })
     );
   };
 

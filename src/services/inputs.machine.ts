@@ -1,6 +1,15 @@
+import type { StateMatching } from '@bemedev/decompose';
 import { assign } from '@xstate/immer';
 import { dequal } from 'dequal';
-import { createMachine, sendParent } from 'xstate';
+import {
+  assign as assignD,
+  createMachine,
+  Prop,
+  sendParent,
+  StateValue,
+  __ResolvedTypesMetaFrom,
+} from 'xstate';
+import type { MatchOptions } from '~utils/machine';
 import { DEFAULT_EVENT_DELIMITER, EVENTS } from './constants';
 import { THROTTLE_TIME } from './inputs.constants';
 import type { Context, Events } from './inputs.types';
@@ -17,6 +26,10 @@ export const inputsMachine = createMachine(
         target: '.idle',
         actions: ['input', 'edit', 'sendParentInput'],
       },
+      __RESET__: {
+        target: '.idle',
+        actions: ['reset'],
+      },
     },
 
     states: {
@@ -27,10 +40,9 @@ export const inputsMachine = createMachine(
             cond: 'isEditing',
           },
         },
-        exit: ['assignPrevious'],
       },
       checking: {
-        exit: ['resetEditing'],
+        entry: ['resetEditing'],
         always: [
           {
             cond: 'currentEqualsPrevious',
@@ -38,6 +50,7 @@ export const inputsMachine = createMachine(
           },
           'done',
         ],
+        exit: ['assignPrevious'],
       },
       done: {
         always: {
@@ -49,6 +62,10 @@ export const inputsMachine = createMachine(
   },
   {
     actions: {
+      reset: assignD((context) => ({
+        name: context.name,
+      })),
+
       input: assign((context, { inputs }) => (context.current = inputs)),
 
       edit: assign((context) => (context.editing = true)),
@@ -56,13 +73,15 @@ export const inputsMachine = createMachine(
       assignPrevious: assign(
         (context) => (context.previous = context.current)
       ),
-
       resetEditing: assign((context) => (context.editing = false)),
 
-      sendParentInput: sendParent(({ name, current: input }) => ({
-        type: `CHILD${DEFAULT_EVENT_DELIMITER}${name}${DEFAULT_EVENT_DELIMITER}${EVENTS.INPUT}`,
-        input,
-      })),
+      sendParentInput: sendParent(
+        ({ name, current: input }) => ({
+          type: `CHILD${DEFAULT_EVENT_DELIMITER}${name}${DEFAULT_EVENT_DELIMITER}${EVENTS.INPUT}`,
+          input,
+        }),
+        {}
+      ),
 
       startQuery: sendParent('START_QUERY'),
     },
@@ -77,3 +96,12 @@ export const inputsMachine = createMachine(
     delays: { THROTTLE_TIME },
   }
 );
+
+export type InputsMachine = typeof inputsMachine;
+export type TypesMeta = __ResolvedTypesMetaFrom<InputsMachine>;
+
+type TSV = Prop<Prop<TypesMeta, 'resolved'>, 'matchesStates'>;
+
+export type MatchesProps = MatchOptions<
+  StateMatching<TSV extends StateValue ? TSV : StateValue>
+>[];
