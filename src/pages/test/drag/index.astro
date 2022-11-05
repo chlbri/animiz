@@ -1,0 +1,10 @@
+---
+import MainLayout from '~shared/MainLayout.astro';
+import ConditionalDropExample from './_components/Drag';
+---
+
+<MainLayout title='Test tooltip'>
+  <div class='flex h-full flex-1 items-center justify-center'>
+    <ConditionalDropExample client:load/>
+  </div>
+</MainLayout>

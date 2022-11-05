@@ -23,6 +23,7 @@
     "@bemedev/decompose": "^0.1.6",
     "@fontsource/overpass": "^4.5.10",
     "@fontsource/roboto": "^4.5.8",
+    "@thisbeyond/solid-dnd": "^0.7.3",
     "@xstate/immer": "^0.3.1",
     "astro": "^1.5.2",
     "class-variance-authority": "^0.2.4",
@@ -37,7 +38,9 @@
   },
   "devDependencies": {
     "@babel/core": "^7.19.6",
+    "@types/lodash.clonedeep": "^4.5.7",
     "image-downloader": "^4.3.0",
+    "lodash.clonedeep": "^4.5.0",
     "node-fetch": "^3.2.10",
     "vite": "^3.1.8",
     "vite-tsconfig-paths": "^3.5.2",

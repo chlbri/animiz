@@ -9,12 +9,15 @@ specifiers:
   '@bemedev/decompose': ^0.1.6
   '@fontsource/overpass': ^4.5.10
   '@fontsource/roboto': ^4.5.8
+  '@thisbeyond/solid-dnd': ^0.7.3
+  '@types/lodash.clonedeep': ^4.5.7
   '@xstate/immer': ^0.3.1
   astro: ^1.5.2
   class-variance-authority: ^0.2.4
   dequal: ^2.0.3
   image-downloader: ^4.3.0
   immer: ^9.0.16
+  lodash.clonedeep: ^4.5.0
   nanoid: ^4.0.0
   node-fetch: ^3.2.10
   sharp: '>=0.31.0'
@@ -34,6 +37,7 @@ dependencies:
   '@bemedev/decompose': 0.1.6
   '@fontsource/overpass': 4.5.10
   '@fontsource/roboto': 4.5.8
+  '@thisbeyond/solid-dnd': 0.7.3_solid-js@1.6.0
   '@xstate/immer': 0.3.1_immer@9.0.16+xstate@4.33.6
   astro: 1.5.2
   class-variance-authority: 0.2.4
@@ -48,7 +52,9 @@ dependencies:
 
 devDependencies:
   '@babel/core': 7.19.6
+  '@types/lodash.clonedeep': 4.5.7
   image-downloader: 4.3.0
+  lodash.clonedeep: 4.5.0
   node-fetch: 3.2.10
   vite: 3.1.8
   vite-tsconfig-paths: 3.5.2_vite@3.1.8
@@ -579,6 +585,14 @@ packages:
       tsm: 2.2.2
     dev: false
 
+  /@thisbeyond/solid-dnd/0.7.3_solid-js@1.6.0:
+    resolution: {integrity: sha512-mX9AE//jyNm9bz9+w60LPukMJ8nkYrUh+RPm8E5SiFdmSI8EoP1hhNgDHFTHbxauoAMLFosi1QBwpgeg/XijDQ==}
+    peerDependencies:
+      solid-js: ^1.5
+    dependencies:
+      solid-js: 1.6.0
+    dev: false
+
   /@types/acorn/4.0.6:
     resolution: {integrity: sha512-veQTnWP+1D/xbxVrPC3zHnCZRjSrKfhbMUlEA43iMZLu7EsnTtkJklIuwrCPbOi8YkvDQAiW05VQQFvvz9oieQ==}
     dependencies:
@@ -659,6 +673,16 @@ packages:
   /@types/json5/0.0.30:
     resolution: {integrity: sha512-sqm9g7mHlPY/43fcSNrCYfOeX9zkTTK+euO5E6+CVijSMm5tTjkVdwdqRkY3ljjIAf8679vps5jKUoJBCLsMDA==}
     dev: false
+
+  /@types/lodash.clonedeep/4.5.7:
+    resolution: {integrity: sha512-ccNqkPptFIXrpVqUECi60/DFxjNKsfoQxSQsgcBJCX/fuX1wgyQieojkcWH/KpE3xzLoWN/2k+ZeGqIN3paSvw==}
+    dependencies:
+      '@types/lodash': 4.14.188
+    dev: true
+
+  /@types/lodash/4.14.188:
+    resolution: {integrity: sha512-zmEmF5OIM3rb7SbLCFYoQhO4dGt2FRM9AMkxvA3LaADOF1n8in/zGJlWji9fmafLoNyz+FoL6FE0SLtGIArD7w==}
+    dev: true
 
   /@types/mdast/3.0.10:
     resolution: {integrity: sha512-W864tg/Osz1+9f4lrGTZpCSO5/z4608eUp19tbozkq2HJK6i3z1kT0H9tlADXuYIb1YYOBByU4Jsqkk75q48qA==}
@@ -2435,6 +2459,10 @@ packages:
     dependencies:
       p-locate: 5.0.0
     dev: false
+
+  /lodash.clonedeep/4.5.0:
+    resolution: {integrity: sha512-H5ZhCF25riFd9uB5UCkVKo61m3S/xZk1x4wA6yp/L3RFP6Z/eHH1ymQcGLo7J3GMPfm0V/7m1tryHuGVxpqEBQ==}
+    dev: true
 
   /log-symbols/5.1.0:
     resolution: {integrity: sha512-l0x2DvrW294C9uDCoQe1VSU4gf529FkSZ6leBl4TiqZH/e+0R7hSfHQBNut2mNygDgHwvYHfFLn6Oxb3VWj2rA==}
