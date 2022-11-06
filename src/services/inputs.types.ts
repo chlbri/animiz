@@ -29,6 +29,4 @@ export type Context = {
   name: string;
 };
 
-export type Events =
-  | { type: 'INPUTS'; inputs: Inputs }
-  | { type: '__RESET__' };
+export type Events = { type: 'INPUTS'; inputs: Inputs };

@@ -18,10 +18,9 @@ export interface Typegen0 {
     delays: never;
   };
   eventsCausingActions: {
-    assignPrevious: "" | "INPUTS" | "__RESET__" | "xstate.stop";
+    assignPrevious: "" | "INPUTS" | "xstate.stop";
     edit: "INPUTS";
     input: "INPUTS";
-    reset: "__RESET__";
     resetEditing: "xstate.after(THROTTLE_TIME)#(machine).idle";
     sendParentInput: "INPUTS";
     startQuery: "";
@@ -32,7 +31,7 @@ export interface Typegen0 {
     isEditing: "xstate.after(THROTTLE_TIME)#(machine).idle";
   };
   eventsCausingDelays: {
-    THROTTLE_TIME: "" | "INPUTS" | "__RESET__" | "xstate.init";
+    THROTTLE_TIME: "" | "INPUTS" | "xstate.init";
   };
   matchesStates: "checking" | "done" | "idle";
   tags: never;

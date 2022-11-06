@@ -126,10 +126,6 @@ const useService = (name = 'INPUTS') => {
     service.send({ type: 'INPUTS', inputs });
   };
 
-  const reset = () => {
-    service.send('__RESET__');
-  };
-
   const stop = service.stop;
 
   const context = <T = Context>(
@@ -155,7 +151,6 @@ const useService = (name = 'INPUTS') => {
     context,
     matches,
     start,
-    reset,
     stop,
     mocks: {
       sendParentInput,

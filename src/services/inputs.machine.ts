@@ -2,7 +2,6 @@ import type { StateMatching } from '@bemedev/decompose';
 import { assign } from '@xstate/immer';
 import { dequal } from 'dequal';
 import {
-  assign as assignD,
   createMachine,
   Prop,
   sendParent,
@@ -25,10 +24,6 @@ export const inputsMachine = createMachine(
       INPUTS: {
         target: '.idle',
         actions: ['input', 'edit', 'sendParentInput'],
-      },
-      __RESET__: {
-        target: '.idle',
-        actions: ['reset'],
       },
     },
 
@@ -62,10 +57,6 @@ export const inputsMachine = createMachine(
   },
   {
     actions: {
-      reset: assignD((context) => ({
-        name: context.name,
-      })),
-
       input: assign((context, { inputs }) => (context.current = inputs)),
 
       edit: assign((context) => (context.editing = true)),
