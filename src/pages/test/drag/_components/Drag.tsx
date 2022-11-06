@@ -10,9 +10,14 @@ import {
 } from '@thisbeyond/solid-dnd';
 
 const Draggable = (props: any) => {
+  //@ts-ignore
   const draggable = createDraggable(props.id, { type: props.type });
   return (
-    <div use:draggable class='px-5 py-3 text-white bg-indigo-600'>
+    <div
+      //@ts-ignore
+      use:draggable
+      class='px-5 py-3 text-white bg-indigo-600 cursor-pointer select-none'
+    >
       {`Draggable type '${props.type}'`}
     </div>
   );
@@ -36,8 +41,9 @@ const Droppable = (props: any) => {
 
   return (
     <div
+      //@ts-ignore
       use:droppable
-      class={`w-60 aspect-square border-2 ${activeClass()}`}
+      class={`w-60 aspect-square border-2 flex items-center justify-center select-none ${activeClass()}`}
     >
       Droppable
       <br />
@@ -62,12 +68,16 @@ const ConditionalDropExample = () => {
   return (
     <DragDropProvider onDragEnd={onDragEnd}>
       <DragDropSensors />
-      <div ref={ref!} class='min-h-15 flex flex-wrap gap-5 justify-center'>
-        <Draggable id={1} type='a' />
-        <Draggable id={2} type='b' />
+      <div class='flex flex-col space-y-8 items-center'>
+        <div ref={ref!} class='min-h-15 flex space-x-5 justify-center'>
+          <Draggable id={1} type='a' />
+          <Draggable id={2} type='b' />
+        </div>
+        <div class='flex space-x-6'>
+          <Droppable id={1} type='a' />
+          <Droppable id={2} type='b' />
+        </div>
       </div>
-      <Droppable id={1} type='a' />
-      <Droppable id={2} type='b' />
     </DragDropProvider>
   );
 };

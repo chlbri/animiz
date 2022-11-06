@@ -17,6 +17,6 @@ export const LIST: NavLinkProps[] = [
   },
   {
     children: '__test__',
-    href: '/test',
+    href: '/test/drag',
   },
 ];

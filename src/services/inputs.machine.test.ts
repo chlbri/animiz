@@ -1,8 +1,8 @@
 import cloneDeep from 'lodash.clonedeep';
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 import { EventObject, interpret } from 'xstate';
-import { matches as matchesD } from '../utils/machine';
-import { advanceByTime } from '../utils/test';
+import { matches as matchesD } from '~utils/machine';
+import { advanceByTime } from '~utils/test';
 import {
   DEFAULT_EVENT_DELIMITER,
   EVENTS,
@@ -52,7 +52,7 @@ const useAssign = (name: string) => {
 
   const testExpect = (helper: TestHelper<Context>) => {
     const checkAll = isTestHelperDefined(helper);
-    if (!checkAll) return true;
+    if (!checkAll) return;
 
     const { context, event, expected } = helper;
     expect(mockFn(context, event)).toEqual(expected);
@@ -72,7 +72,7 @@ const useGuard = (name: string) => {
 
   const testExpect = (helper: TestHelper<boolean>) => {
     const checkAll = isTestHelperDefined(helper);
-    if (!checkAll) return true;
+    if (!checkAll) return;
 
     const { context, event, expected } = helper;
     expect(mockFn(context, event)).toEqual(expected);
