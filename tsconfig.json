@@ -39,7 +39,6 @@
     "allowUnusedLabels": false,
     "jsx": "preserve",
     // #endregion
-    "types": ["vitest/globals"],
     "baseUrl": ".",
     "paths": {
       "~components/*": ["src/components/*"],

@@ -15,7 +15,10 @@ import {
   TypegenEnabled,
   Typestate,
 } from 'xstate';
-import { matches as matchesD, MatchOptions } from '~utils/machine';
+import {
+  matches as matchesD,
+  MatchOptions,
+} from '~services/utils/machine/matches';
 
 export type SenderProps<
   TEvent extends EventObject = EventObject,
@@ -25,10 +28,6 @@ export type SenderProps<
     ? never
     : [Omit<U, 'type'>]
   : never;
-
-type T1 = { type: 'eerer'; arg: 2 } | { type: 'two' };
-
-type T2 = Extract<T1, { type: 'two' }>;
 
 export function createInterpret<
   TContext,

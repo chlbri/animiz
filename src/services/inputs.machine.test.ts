@@ -1,15 +1,15 @@
 import cloneDeep from 'lodash.clonedeep';
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
-import { EventObject, interpret } from 'xstate';
-import { matches as matchesD } from '~utils/machine';
+import { interpret } from 'xstate';
 import { advanceByTime } from '~utils/test';
 import {
   DEFAULT_EVENT_DELIMITER,
   EVENTS,
   THROTTLE_TIME,
 } from './constants';
-import { inputsMachine, MatchesProps } from './inputs.machine';
-import type { Context, Events, Inputs } from './inputs.types';
+import { inputsMachine } from './inputs.machine';
+import type { Context, Inputs } from './inputs.types';
+import { useServiceTest } from './utils/machine/test/service';
 
 beforeAll(() => {
   vi.useFakeTimers();
@@ -19,186 +19,58 @@ afterAll(() => {
   vi.useRealTimers();
 });
 
-type Action<T = any> = (context?: Context, event?: Events) => T;
-type TestHelper<T = any> = {
-  context?: Context;
-  event?: Events;
-  expected: T;
-};
-
+// #region Hooks
 const generateDefaultContext = (context?: Partial<Context>) => {
   return { name: 'INPUTS', ...context } as Context;
 };
 
-const isTestHelperDefined = <T>(helper: TestHelper<T>) => {
-  const { context, event } = helper;
-  const checkAll = !context && !event;
-  if (checkAll) return false;
-  return true;
-};
+const useTest = (name = 'INPUTS') => {
+  const machine = inputsMachine.withContext({ name });
 
-// #region Hooks
-const useAssign = (name: string) => {
-  const action = inputsMachine.options.actions?.[name] as any;
-  const fn = action?.assignment;
-  const mockFn = vi.fn(fn);
-  if (!fn) throw 'Action not exists';
+  const { rebuild, ...service } = useServiceTest(machine);
 
-  const acceptance = () => {
-    expect(action).toBeDefined();
-    expect(action?.type).toBe('xstate.assign');
-    expect(mockFn).toBeDefined();
+  const _send = service.sender('INPUTS');
+
+  const send = (inputs: Inputs) => {
+    _send({ inputs });
   };
 
-  const testExpect = (helper: TestHelper<Context>) => {
-    const checkAll = isTestHelperDefined(helper);
-    if (!checkAll) return;
-
-    const { context, event, expected } = helper;
-    expect(mockFn(context, event)).toEqual(expected);
-  };
-
-  return [acceptance, testExpect, mockFn] as const;
-};
-
-const useGuard = (name: string) => {
-  const guard = inputsMachine.options.guards?.[name] as Action<boolean>;
-  if (!guard) throw 'Guard not exists';
-  const mockFn = vi.fn(guard);
-
-  const acceptance = () => {
-    expect(guard).toBeInstanceOf(Function);
-  };
-
-  const testExpect = (helper: TestHelper<boolean>) => {
-    const checkAll = isTestHelperDefined(helper);
-    if (!checkAll) return;
-
-    const { context, event, expected } = helper;
-    expect(mockFn(context, event)).toEqual(expected);
-  };
-
-  return [acceptance, testExpect, mockFn] as const;
-};
-
-const useSenderParent = (name: string) => {
-  const action = inputsMachine.options.actions?.[name] as any;
-  if (!action) throw 'Action not exists';
-
-  type Event = EventObject & Record<string, any>;
-  const send = action.event as Action<Event> | Event;
-
-  const acceptance = () => {
-    expect(action).toBeDefined();
-    expect(action.type).toBe('xstate.send');
-    expect(send).toBeDefined();
-  };
-
-  const testExpect = (helper: TestHelper<Event>) => {
-    const checkAll = isTestHelperDefined(helper);
-    if (!checkAll) return;
-
-    const { context, event, expected: result } = helper;
-
-    if (typeof send === 'function') {
-      const actual = send(context, event);
-      expect(actual).toEqual(result);
-    } else {
-      expect(send).toEqual(result);
-    }
-  };
-
-  return [acceptance, testExpect] as const;
-};
-
-const useService = (name = 'INPUTS') => {
   const sendParentInput = vi.fn(() => {});
   const startQuery = vi.fn(() => {});
-  const service = interpret(
-    inputsMachine.withContext({ name }).withConfig({
-      actions: {
-        sendParentInput,
-        startQuery,
-      },
-    })
-  );
-  const send = (inputs: Inputs) => {
-    service.send({ type: 'INPUTS', inputs });
+
+  const _rebuild = () => {
+    const options = {
+      actions: { sendParentInput, startQuery },
+    };
+    sendParentInput.mockClear();
+    startQuery.mockClear();
+    return rebuild(undefined, options);
   };
-
-  const stop = service.stop;
-
-  const context = <T = Context>(
-    expected: T,
-    selector?: (context: Context) => T
-  ) => {
-    const innerContext = service.getSnapshot().context;
-    const actual = selector ? selector(innerContext) : innerContext;
-    expect(actual).toEqual(expected);
-  };
-
-  const matches = (...values: MatchesProps) => {
-    const value = service.getSnapshot().value;
-    const fn = matchesD(value);
-    const actual = fn(...values);
-    expect(actual).toBe(true);
-  };
-
-  const start = service.start.bind(service);
 
   return {
+    ...service,
     send,
-    context,
-    matches,
-    start,
-    stop,
+    rebuild: _rebuild,
     mocks: {
       sendParentInput,
       startQuery,
     },
-  } as const;
+  };
 };
+
+const {
+  useAssign,
+  useGuard,
+  useSendParent,
+  rebuild,
+  send,
+  context,
+  start,
+  mocks: { sendParentInput, startQuery },
+} = useTest();
 // #endregion
 
 describe('Acceptance', () => {
-  describe('Test the tests', () => {
-    describe('useAssign', () => {
-      test.concurrent('Function not exists', () => {
-        const safe = () => useAssign('notExists');
-        expect(safe).toThrow('Action not exists');
-      });
-
-      test.concurrent('Context in function Helper is undefined', () => {
-        const [_, expect] = useAssign('input');
-        expect({ expected: { name: '' } });
-      });
-    });
-
-    describe('useSendParent', () => {
-      test.concurrent('Function not exists', () => {
-        const safe = () => useSenderParent('notExists');
-        expect(safe).toThrow('Action not exists');
-      });
-
-      test.concurrent('Context in function Helper is undefined', () => {
-        const [_, expect] = useSenderParent('resetEditing');
-        expect({ expected: { type: 'any' } });
-      });
-    });
-
-    describe('useGuard', () => {
-      test.concurrent('Function not exists', () => {
-        const safe = () => useGuard('notExists');
-        expect(safe).toThrow('Guard not exists');
-      });
-
-      test.concurrent('Context in function Helper is undefined', () => {
-        const [_, expect] = useGuard('isEditing');
-        expect({ expected: true });
-      });
-    });
-  });
-
   test.concurrent('The machine is defined', () => {
     const actual = inputsMachine;
     expect(actual).toBeDefined();
@@ -354,7 +226,7 @@ describe('Acceptance', () => {
     });
 
     describe('sendParentInput', () => {
-      const [acceptance, testExpect] = useSenderParent('sendParentInput');
+      const [acceptance, testExpect] = useSendParent('sendParentInput');
 
       test.concurrent('Sender exists', () => {
         acceptance();
@@ -391,7 +263,7 @@ describe('Acceptance', () => {
     });
 
     describe('startQuery', () => {
-      const [acceptance, testExpect] = useSenderParent('startQuery');
+      const [acceptance, testExpect] = useSendParent('startQuery');
 
       test.concurrent('Sender exists', () => {
         acceptance();
@@ -510,24 +382,23 @@ describe('Testing service', () => {
   });
 
   describe('Workflow', () => {
-    describe('first', () => {
-      const {
-        send,
-        context,
-        start,
-        mocks: { sendParentInput, startQuery },
-      } = useService();
+    describe('First', () => {
+      beforeAll(rebuild);
       const inputs: Inputs = { country: 'CN', genres: ['Action'] };
 
       test('Start the machine', () => start());
 
       test('Send Inputs', () => send(inputs));
+      test('Wait', () => advanceByTime(10));
 
       test('Editing is true', () => {
-        context(true, (context) => context.editing);
+        context(true, (context) => {
+          return context.editing;
+        });
       });
 
       test('Sends input to parent', () => {
+        sendParentInput.mock.calls.length; //?
         expect(sendParentInput).toBeCalledTimes(1);
       });
 
@@ -570,13 +441,8 @@ describe('Testing service', () => {
       });
     });
 
-    describe('second', () => {
-      const {
-        send,
-        context,
-        start,
-        mocks: { sendParentInput, startQuery },
-      } = useService();
+    describe('Second', () => {
+      beforeAll(rebuild);
       const inputs1: Inputs = { country: 'CN', genres: ['Action'] };
       const inputs2: Inputs = { country: 'KR', genres: ['Action'] };
 

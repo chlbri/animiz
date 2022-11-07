@@ -8,15 +8,16 @@ export interface Typegen0 {
   };
   invokeSrcNameMap: {};
   missingImplementations: {
-    actions: never;
+    actions: "addGenre";
     services: never;
-    guards: never;
+    guards: "hasGenre";
     delays: never;
   };
   eventsCausingActions: {
     addAiringStatus: "";
     addCountry: "";
     addFormat: "";
+    addGenre: "";
     addParams: "QUERY";
     addText: "";
     addYear: "";
@@ -27,6 +28,7 @@ export interface Typegen0 {
     hasAiringStatus: "";
     hasCountry: "";
     hasFormat: "";
+    hasGenre: "";
     hasText: "";
     hasYear: "";
   };
@@ -38,6 +40,7 @@ export interface Typegen0 {
     | "params.airingStatus"
     | "params.country"
     | "params.format"
+    | "params.genre"
     | "params.text"
     | "params.url"
     | "params.year"
@@ -46,6 +49,7 @@ export interface Typegen0 {
           | "airingStatus"
           | "country"
           | "format"
+          | "genre"
           | "text"
           | "url"
           | "year";

@@ -8,7 +8,7 @@ import {
   StateValue,
   __ResolvedTypesMetaFrom,
 } from 'xstate';
-import type { MatchOptions } from '~utils/machine';
+import type { MatchOptions } from '~services/utils/machine/matches';
 import { DEFAULT_EVENT_DELIMITER, EVENTS } from './constants';
 import { THROTTLE_TIME } from './inputs.constants';
 import type { Context, Events } from './inputs.types';

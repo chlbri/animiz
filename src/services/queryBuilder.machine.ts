@@ -10,7 +10,7 @@ export type QueryFilter = {
   genres?: string[] | null;
 };
 
-type Context = QueryFilter & { url?: URL };
+type Context = QueryFilter & { url?: URL; host?: string };
 type Events = { type: 'QUERY' } & QueryFilter;
 
 export const queryBuilderMachine = createMachine(
@@ -114,32 +114,37 @@ export const queryBuilderMachine = createMachine(
   },
   {
     actions: {
-      addAiringStatus: assign((ctx) => {
-        ctx.url!.searchParams.append('airingStatus', ctx.airingStatus!);
+      addAiringStatus: assign((context) => {
+        context.url!.searchParams.append(
+          'airingStatus',
+          context.airingStatus!
+        );
       }),
 
-      addCountry: assign((ctx) => {
-        ctx.url!.searchParams.append('country', ctx.country!);
+      addCountry: assign((context) => {
+        context.url!.searchParams.append('country', context.country!);
       }),
 
-      addFormat: assign((ctx) => {
-        ctx.url!.searchParams.append('format', ctx.format!);
+      addFormat: assign((context) => {
+        context.url!.searchParams.append('format', context.format!);
       }),
 
-      addParams: assign((ctx, { type, ...params }) => {
-        ctx = params;
+      addParams: assign((context, { type, ...params }) => {
+        context = params;
       }),
 
-      addText: assign((ctx) => {
-        ctx.url!.searchParams.append('text', ctx.text!);
+      addText: assign((context) => {
+        context.url!.searchParams.append('text', context.text!);
       }),
 
-      addYear: assign((ctx) => {
-        ctx.url!.searchParams.append('year', ctx.year!);
+      addYear: assign((context) => {
+        context.url!.searchParams.append('year', context.year!);
       }),
 
-      createURL: assign((ctx) => {
-        ctx.url = new URL('localhost:3000/api/mangas.json');
+      createURL: assign((context) => {
+        context.url = new URL(
+          context.host ?? 'localhost:3000/api/mangas.json'
+        );
       }),
     },
     guards: {
