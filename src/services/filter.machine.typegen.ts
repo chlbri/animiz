@@ -4,26 +4,40 @@ export interface Typegen0 {
   "@@xstate/typegen": true;
   internalEvents: {
     "": { type: "" };
+    "done.invoke.(machine).extraction:invocation[0]": {
+      type: "done.invoke.(machine).extraction:invocation[0]";
+      data: unknown;
+      __tip: "See the XState TS docs to learn how to strongly type this.";
+    };
     "xstate.init": { type: "xstate.init" };
+    "xstate.stop": { type: "xstate.stop" };
   };
-  invokeSrcNameMap: {};
+  invokeSrcNameMap: {
+    extractParams: "done.invoke.(machine).extraction:invocation[0]";
+  };
   missingImplementations: {
-    actions: never;
+    actions: "wakeExtractParams";
     services: never;
     guards: never;
     delays: never;
   };
   eventsCausingActions: {
-    addParams: "";
+    extractParams: "" | "done.invoke.(machine).extraction:invocation[0]";
     filterAiringStatus: "";
     filterCountry: "";
     filterFormat: "";
     filterGenres: "";
     filterText: "";
     filterYear: "";
-    initialize: "";
+    initialize:
+      | ""
+      | "done.invoke.(machine).extraction:invocation[0]"
+      | "xstate.stop";
+    wakeExtractParams: "ASSIGN_URL";
   };
-  eventsCausingServices: {};
+  eventsCausingServices: {
+    extractParams: "ASSIGN_URL";
+  };
   eventsCausingGuards: {
     hasAiringStatus: "";
     hasCountry: "";
@@ -34,6 +48,7 @@ export interface Typegen0 {
   };
   eventsCausingDelays: {};
   matchesStates:
+    | "extraction"
     | "final"
     | "idle"
     | "params"

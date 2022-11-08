@@ -1,7 +1,7 @@
-import { assign, createMachine, interpret } from 'xstate';
-import { waitFor } from 'xstate/lib/waitFor';
+import { assign, createMachine } from 'xstate';
 import { z } from 'zod';
 import data from '../../public/json/data.json';
+import extractParams from './extractParams.machine';
 import type { AiringStatus, CountryKey } from './inputs.types';
 import { QueryFilter, queryFilterSchema } from './urlBuilder.machine';
 
@@ -22,7 +22,13 @@ export const artSchema = queryFilterSchema
 
 export type Art = z.infer<typeof artSchema>;
 
-type Context = QueryFilter & { arts?: Art[]; params: URLSearchParams };
+export const contextSchema = queryFilterSchema.extend({
+  arts: artSchema.array().optional(),
+  params: z.custom<URLSearchParams>().optional(),
+});
+
+export type Context = z.infer<typeof contextSchema>;
+export type Events = { type: 'ASSIGN_URL'; url: URL };
 
 export const filterMachine = createMachine(
   {
@@ -31,15 +37,35 @@ export const filterMachine = createMachine(
     tsTypes: {} as import('./filter.machine.typegen').Typegen0,
     schema: {
       context: {} as Context,
+      events: {} as Events,
+      services: {} as {
+        extractParams: { data: QueryFilter };
+      },
     },
 
     initial: 'idle',
     states: {
       idle: {
         always: {
-          actions: ['addParams', 'initialize'],
+          actions: ['extractParams', 'initialize'],
           target: 'params',
         },
+        on: {
+          ASSIGN_URL: {
+            target: 'extraction',
+          },
+        },
+      },
+      extraction: {
+        entry: ['wakeExtractParams'],
+        invoke: {
+          src: 'extractParams',
+          onDone: {
+            target: 'params',
+            actions: ['extractParams'],
+          },
+        },
+        exit: ['initialize'],
       },
       params: {
         initial: 'text',
@@ -117,11 +143,11 @@ export const filterMachine = createMachine(
   {
     actions: {
       //TODO: Transform to service
-      addParams: assign({
+      extractParams: assign({
         airingStatus: ({ params }) => {
-          return params.get('airingStatus') as AiringStatus;
+          return params?.get('airingStatus') as AiringStatus;
         },
-        year: ({ params }) => params.get('year'),
+        year: ({ params }) => params?.get('year'),
         format: ({ params }) => params.get('format'),
         text: ({ params }) => params.get('text'),
         country: ({ params }) => {
@@ -194,12 +220,8 @@ export const filterMachine = createMachine(
       hasYear: ({ year }) => !!year,
       hasGenres: ({ genres }) => !!genres && genres.length > 0,
     },
+    services: {
+      extractParams,
+    },
   }
 );
-
-export async function filterService(params: URLSearchParams) {
-  const service = interpret(filterMachine.withContext({ params })).start();
-  const state = await waitFor(service, (state) => !!state.done);
-
-  return state.context.arts;
-}
