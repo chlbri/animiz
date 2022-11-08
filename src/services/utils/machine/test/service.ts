@@ -120,7 +120,7 @@ export const useServiceTest = <
   };
   const useAssign = (action: _ActionKey) => useAssignTest(machine, action);
   const useGuard = (guard: _GuardKey) => useGuardTest(machine, guard);
-  //TODO: Create useAssign to use machine as promise
+  //TODO: Create useAsync to use machine as promise
   // #endregion
 
   type _Options = Options<TContext, TEvents, TResolvedTypesMeta>;
