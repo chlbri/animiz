@@ -9,7 +9,7 @@ import type {
   Typestate,
 } from 'xstate';
 import { isTestHelperDefined } from './helpers';
-import type { TestHelper } from './types';
+import type { ActionKey, TestHelper } from './types';
 
 export const useAssignTest = <
   TContext extends object,
@@ -36,7 +36,7 @@ export const useAssignTest = <
     TServiceMap,
     TResolvedTypesMeta
   >,
-  name: string
+  name: ActionKey<TContext, TEvents, TResolvedTypesMeta>
 ) => {
   const action = machine.options.actions?.[name] as any;
   const fn = action?.assignment;

@@ -1,20 +1,26 @@
 import { assign, createMachine, interpret } from 'xstate';
 import { waitFor } from 'xstate/lib/waitFor';
+import { z } from 'zod';
 import data from '../../public/json/data.json';
-import type { QueryFilter } from './queryBuilder.machine';
+import type { AiringStatus, CountryKey } from './inputs.types';
+import { QueryFilter, queryFilterSchema } from './urlBuilder.machine';
 
-export type Art = {
-  format?: string;
-  description?: string;
-  status: string;
-  title: string;
-  year?: number;
-  src: string;
-  country: string;
-  color?: string;
-  genres?: string[];
-  id: string;
-};
+export const artSchema = queryFilterSchema
+  .omit({
+    airingStatus: true,
+    country: true,
+  })
+  .extend({
+    airingStatus: queryFilterSchema.shape.airingStatus.unwrap().unwrap(),
+    country: queryFilterSchema.shape.country.unwrap().unwrap(),
+    title: z.string(),
+    description: z.string().optional(),
+    src: z.string().optional(),
+    color: z.string().optional(),
+    id: z.string().optional(),
+  });
+
+export type Art = z.infer<typeof artSchema>;
 
 type Context = QueryFilter & { arts?: Art[]; params: URLSearchParams };
 
@@ -110,12 +116,17 @@ export const filterMachine = createMachine(
   },
   {
     actions: {
+      //TODO: Transform to service
       addParams: assign({
-        airingStatus: ({ params }) => params.get('airingStatus'),
+        airingStatus: ({ params }) => {
+          return params.get('airingStatus') as AiringStatus;
+        },
         year: ({ params }) => params.get('year'),
         format: ({ params }) => params.get('format'),
         text: ({ params }) => params.get('text'),
-        country: ({ params }) => params.get('country'),
+        country: ({ params }) => {
+          return params.get('country') as CountryKey;
+        },
         genres: ({ params }) => {
           const _genres = params.get('genres');
           if (!_genres) return;
@@ -125,7 +136,7 @@ export const filterMachine = createMachine(
 
       filterAiringStatus: assign({
         arts: ({ arts, airingStatus }) => {
-          return arts?.filter((val) => val.status === airingStatus);
+          return arts?.filter((val) => val.airingStatus === airingStatus);
         },
       }),
 
@@ -168,7 +179,11 @@ export const filterMachine = createMachine(
       }),
 
       initialize: assign({
-        arts: (_) => data,
+        arts: (_) =>
+          data.map((val) => ({
+            ...val,
+            airingStatus: val.status,
+          })) as Art[],
       }),
     },
     guards: {

@@ -9,7 +9,7 @@ import type {
   Typestate,
 } from 'xstate';
 import { isTestHelperDefined } from './helpers';
-import type { Action, TestHelper } from './types';
+import type { Action, GuardKey, TestHelper } from './types';
 
 export const useGuardTest = <
   TContext extends object,
@@ -36,7 +36,7 @@ export const useGuardTest = <
     TServiceMap,
     TResolvedTypesMeta
   >,
-  name: string
+  name: GuardKey<TContext, TEvents, TResolvedTypesMeta>
 ) => {
   const guard = machine.options.guards?.[name] as Action<
     TContext,

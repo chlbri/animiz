@@ -8,9 +8,9 @@ export interface Typegen0 {
   };
   invokeSrcNameMap: {};
   missingImplementations: {
-    actions: "addGenre";
+    actions: never;
     services: never;
-    guards: "hasGenre";
+    guards: never;
     delays: never;
   };
   eventsCausingActions: {
@@ -40,7 +40,7 @@ export interface Typegen0 {
     | "params.airingStatus"
     | "params.country"
     | "params.format"
-    | "params.genre"
+    | "params.genres"
     | "params.text"
     | "params.url"
     | "params.year"
@@ -49,7 +49,7 @@ export interface Typegen0 {
           | "airingStatus"
           | "country"
           | "format"
-          | "genre"
+          | "genres"
           | "text"
           | "url"
           | "year";

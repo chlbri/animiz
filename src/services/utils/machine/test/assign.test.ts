@@ -1,15 +1,12 @@
-import { partialCall } from '~utils/functions';
 import { useAssignTest } from './assign';
 import { inputMachine } from './fixtures/input.machine';
 
-const use = partialCall(useAssignTest, inputMachine);
-
 test.concurrent('Function not exists', () => {
-  const safe = () => use('notExists');
+  const safe = () => useAssignTest(inputMachine, 'notExists' as any);
   expect(safe).toThrow('Action not exists');
 });
 
 test.concurrent('Context in function Helper is undefined', () => {
-  const [_, expect] = use('input');
+  const [_, expect] = useAssignTest(inputMachine, 'input');
   expect({ expected: { name: '' } });
 });

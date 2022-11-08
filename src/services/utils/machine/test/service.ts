@@ -6,7 +6,6 @@ import type {
 import {
   BaseActionObject,
   EventObject,
-  InternalMachineOptions,
   interpret,
   InterpreterStatus,
   NoInfer,
@@ -23,10 +22,10 @@ import {
   matches as matchesD,
   MatchOptions,
 } from '~services/utils/machine/matches';
-import { partialCall } from '~utils/functions';
 import { useAssignTest } from './assign';
 import { useGuardTest } from './guard';
 import { useSendParentTest } from './sendParent';
+import type { ActionKey, GuardKey, Options } from './types';
 
 export const useServiceTest = <
   TContext extends object,
@@ -69,10 +68,10 @@ export const useServiceTest = <
   };
 
   const sender = <T extends TEvents['type']>(type: T) => {
-    type E = TEvents extends { type: T } & infer U
+    type E = Required<TEvents> extends { type: T } & infer U
       ? LengthOf<TuplifyUnion<Extract<U, { type: T }>>> extends 0
         ? []
-        : [Omit<U, 'type'>]
+        : [Omit<Extract<TEvents, { type: T }>, 'type'>]
       : never;
 
     const fn = (...[event]: E) => {
@@ -112,18 +111,19 @@ export const useServiceTest = <
   };
   // #endregion
 
-  const useSendParent = partialCall(useSendParentTest, machine);
-  const useAssign = partialCall(useAssignTest, machine);
-  const useGuard = partialCall(useGuardTest, machine);
+  // #region Hooks
+  type _ActionKey = ActionKey<TContext, TEvents, TResolvedTypesMeta>;
+  type _GuardKey = GuardKey<TContext, TEvents, TResolvedTypesMeta>;
 
-  type Options = InternalMachineOptions<
-    TContext,
-    TEvents,
-    TResolvedTypesMeta,
-    true
-  >;
+  const useSendParent = (action: _ActionKey) => {
+    return useSendParentTest(machine, action);
+  };
+  const useAssign = (action: _ActionKey) => useAssignTest(machine, action);
+  const useGuard = (guard: _GuardKey) => useGuardTest(machine, guard);
+  // #endregion
 
-  const rebuild = (context?: TContext, options?: Options) => {
+  type _Options = Options<TContext, TEvents, TResolvedTypesMeta>;
+  const rebuild = (context?: TContext, options?: _Options) => {
     const status = service.status;
     if (status === InterpreterStatus.Running) {
       stop();

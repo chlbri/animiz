@@ -1,5 +1,10 @@
 import { assign } from '@xstate/immer';
-import { createMachine, sendParent } from 'xstate';
+import {
+  createMachine,
+  InternalMachineOptions,
+  sendParent,
+  __ResolvedTypesMetaFrom,
+} from 'xstate';
 
 export type Context = {
   editing?: boolean;
@@ -68,3 +73,11 @@ export const inputMachine = createMachine(
     delays: { THROTTLE_TIME: 200 },
   }
 );
+
+type Mach = typeof inputMachine;
+type TResolvedTypesMeta = __ResolvedTypesMetaFrom<Mach>;
+export type Options = Exclude<
+  InternalMachineOptions<Context, Events, TResolvedTypesMeta, true>,
+  undefined
+>;
+// const test2 :T = {}

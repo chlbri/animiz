@@ -1,16 +1,28 @@
-import type {
+import type { TuplifyUnion } from '@bemedev/core';
+import type { z } from 'zod';
+import { createZodStringLiterals } from '~utils/zod';
+import {
   AIRING_STATUS,
   COUNTRY_CODES,
   FORMATS,
   GENRES,
 } from './inputs.constants';
 
-export type Genre = typeof GENRES[number];
-export type Format = typeof FORMATS[number];
+export const formatSchema = createZodStringLiterals(...FORMATS);
+export const airingStatusSchema = createZodStringLiterals(
+  ...AIRING_STATUS
+);
+
+const keys = Object.keys(COUNTRY_CODES) as TuplifyUnion<CountryKey>;
+export const countryKeySchema = createZodStringLiterals(...keys);
+export const genreSchema = createZodStringLiterals(...GENRES);
+
+export type Genre = z.infer<typeof genreSchema>;
+export type Format = z.infer<typeof formatSchema>;
+export type AiringStatus = z.infer<typeof airingStatusSchema>;
 export type CountryCodes = typeof COUNTRY_CODES;
 export type CountryKey = keyof CountryCodes;
 export type CountryValue = CountryCodes[CountryKey];
-export type AiringStatus = typeof AIRING_STATUS[number];
 
 export type Inputs = {
   text?: string;

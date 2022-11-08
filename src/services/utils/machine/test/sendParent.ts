@@ -9,7 +9,7 @@ import type {
   Typestate,
 } from 'xstate';
 import { isTestHelperDefined } from './helpers';
-import type { Action, TestHelper } from './types';
+import type { Action, ActionKey, TestHelper } from './types';
 
 export const useSendParentTest = <
   TContext extends object,
@@ -36,7 +36,7 @@ export const useSendParentTest = <
     TServiceMap,
     TResolvedTypesMeta
   >,
-  name: string
+  name: ActionKey<TContext, TEvents, TResolvedTypesMeta>
 ) => {
   const action = machine.options.actions?.[name] as any;
   if (!action) throw 'Action not exists';

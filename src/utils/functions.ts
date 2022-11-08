@@ -1,8 +1,12 @@
 type Arr = readonly any[];
 
-export function partialCall<T extends Arr, U extends Arr, R>(
-  f: (...args: [...T, ...U]) => R,
+/**
+ *
+ * (Don't use on generic functions)
+ */
+export function reduceFuntion<U extends Arr, T extends Arr = Arr, R = any>(
+  fn: (...args: [...T, ...U]) => R,
   ...headArgs: T
 ) {
-  return (...tailArgs: U) => f(...headArgs, ...tailArgs);
+  return (...tailArgs: U) => fn(...headArgs, ...tailArgs);
 }

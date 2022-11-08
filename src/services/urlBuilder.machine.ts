@@ -1,27 +1,50 @@
 import { assign } from '@xstate/immer';
-import { createMachine } from 'xstate';
+import { assign as assignX, createMachine } from 'xstate';
+import { z } from 'zod';
+import {
+  airingStatusSchema,
+  countryKeySchema,
+  formatSchema,
+  genreSchema,
+} from './inputs.types';
+import type {
+  ActionKeyFromMachine,
+  GuardKeyFromMachine,
+} from './utils/machine/test/types';
 
-export type QueryFilter = {
-  text?: string | null;
-  year?: string | null;
-  format?: string | null;
-  airingStatus?: string | null;
-  country?: string | null;
-  genres?: string[] | null;
+export const DEFAULT_HOST = 'localhost:3000/api/mangas.json';
+
+export const queryFilterSchema = z.object({
+  text: z.string().nullable().optional(),
+  year: z.string().nullable().optional(),
+  format: formatSchema.nullable().optional(),
+  airingStatus: airingStatusSchema.nullable().optional(),
+  country: countryKeySchema.nullable().optional(),
+  genres: genreSchema.array().nullable().optional(),
+});
+
+export type QueryFilter = z.infer<typeof queryFilterSchema>;
+
+export type Context = QueryFilter & { url?: URL; host?: string };
+export type Events = { type: 'QUERY' } & QueryFilter;
+
+const checkValue = <T extends (string | null | undefined)[]>(
+  ...values: T
+) => {
+  return values.every((value) => !!value && value !== '');
 };
 
-type Context = QueryFilter & { url?: URL; host?: string };
-type Events = { type: 'QUERY' } & QueryFilter;
-
-export const queryBuilderMachine = createMachine(
+export const urlBuilderMachine = createMachine(
   {
     predictableActionArguments: true,
     preserveActionOrder: true,
-    tsTypes: {} as import('./queryBuilder.machine.typegen').Typegen0,
+    tsTypes: {} as import('./urlBuilder.machine.typegen').Typegen0,
     schema: {
       context: {} as Context,
       events: {} as Events,
     },
+
+    context: {},
 
     initial: 'idle',
     states: {
@@ -57,12 +80,12 @@ export const queryBuilderMachine = createMachine(
               {
                 cond: 'hasYear',
                 actions: ['addYear'],
-                target: 'genre',
+                target: 'genres',
               },
-              'genre',
+              'genres',
             ],
           },
-          genre: {
+          genres: {
             always: [
               {
                 cond: 'hasGenre',
@@ -129,12 +152,19 @@ export const queryBuilderMachine = createMachine(
         context.url!.searchParams.append('format', context.format!);
       }),
 
-      addParams: assign((context, { type, ...params }) => {
-        context = params;
+      addParams: assignX((_, { type, ...params }) => {
+        return params;
       }),
 
       addText: assign((context) => {
         context.url!.searchParams.append('text', context.text!);
+      }),
+
+      addGenre: assign((context) => {
+        context.url!.searchParams.append(
+          'genres',
+          JSON.stringify(context.genres!)
+        );
       }),
 
       addYear: assign((context) => {
@@ -142,17 +172,21 @@ export const queryBuilderMachine = createMachine(
       }),
 
       createURL: assign((context) => {
-        context.url = new URL(
-          context.host ?? 'localhost:3000/api/mangas.json'
-        );
+        context.host = context.host ?? DEFAULT_HOST;
+        context.url = new URL(context.host);
       }),
     },
     guards: {
-      hasAiringStatus: ({ airingStatus }) => !!airingStatus,
-      hasCountry: ({ country }) => !!country,
-      hasFormat: ({ format }) => !!format,
-      hasText: ({ text }) => !!text,
-      hasYear: ({ year }) => !!year,
+      hasAiringStatus: ({ airingStatus }) => checkValue(airingStatus),
+      hasCountry: ({ country }) => checkValue(country),
+      hasFormat: ({ format }) => checkValue(format),
+      hasText: ({ text }) => checkValue(text),
+      hasYear: ({ year }) => checkValue(year),
+      hasGenre: ({ genres }) => !!genres && checkValue(...genres),
     },
   }
 );
+
+export type UrlBuilderMachine = typeof urlBuilderMachine;
+export type ActionKey = ActionKeyFromMachine<UrlBuilderMachine>;
+export type GuardKey = GuardKeyFromMachine<UrlBuilderMachine>;
