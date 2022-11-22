@@ -1,4 +1,5 @@
 export async function advanceByTime(ms: number) {
-  await Promise.resolve();
-  vi.advanceTimersByTime(ms);
+  return Promise.resolve().then(() => {
+    vi.advanceTimersByTime(ms);
+  });
 }
